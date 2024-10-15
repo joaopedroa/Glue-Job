@@ -69,6 +69,11 @@ Antes de começar, verifique se você atendeu aos seguintes requisitos:
   - <img src="images/Configurar_aws_pycharm.png" alt="Exemplo imagem" width="550" height="450">
   - <img src="images/aws_toolkit.png" alt="Exemplo imagem" width="550" height="450">
   
+## 💻 Explicando o Código
+
+ - Extraindo os dados de um bucket do S3
+ - Processar os dados criando novas colunas
+ - Inserindo os dados no DynamoDB
   
 ## 🤝 Colaboradores
 
