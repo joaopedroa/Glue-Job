@@ -9,7 +9,7 @@ class ParcelaProcessor:
         return list(map(lambda parcela: parcela.to_json(), self.parcelas))
 
     def __ordernar_parcelas(self, parcela:Parcela):
-        return parcela.numero_plano, parcela.numero_plano
+        return parcela.numero_plano, parcela.numero_parcela
 
 
 

@@ -2,6 +2,7 @@ import sys
 
 from app.core.enums.dominio import Dominio
 from awsglue.transforms import *
+from awsglue.dynamicframe import DynamicFrame
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
 from awsglue.context import GlueContext
@@ -9,6 +10,7 @@ from awsglue.job import Job
 from pyspark.sql.functions import col, substring, lit, udf
 from pyspark.sql.types import StringType
 from pyspark.sql import functions as F
+from datetime import date
 
 def extract(path, transformation_ctx, glueContext):
     return (
@@ -23,22 +25,31 @@ def processar_trancode_de_dados_udf(lista_trancode, codigo_dominio, codigo_ident
     dominio = Dominio.get_instance(codigo_dominio)
     return dominio.choose_method_process(lista_trancode, codigo_identificador_carga).processar()
 
+@udf(returnType=StringType())
+def to_dominio(codigo_dominio, custodia, codigo_identificador_carga):
+    return Dominio.get_instance(codigo_dominio).name +  "#" + custodia + "#" + codigo_identificador_carga
+
 def transform_headers(data_frame):
     column_base = 'trancode_mainframe'
-    return ((data_frame
+    return (((data_frame
             .withColumn('custodia',  col(column_base).substr(0, 2))
             .withColumn('codigo_dominio',  col(column_base).substr(3, 2).cast("Integer"))
-            .withColumn('id_operacao',  col(column_base).substr(5, 8))
-            .withColumn('codigo_identificador_carga',  col(column_base).substr(13, 15))
-            .withColumn('trancode',  col(column_base).substr(28, 100000))
-            ).groupby("custodia", "codigo_dominio", "id_operacao", "codigo_identificador_carga").agg(F.collect_set("trancode").alias('lista_trancode'))
-            ).withColumn('dados_dominio',  processar_trancode_de_dados_udf(col('lista_trancode'),col('codigo_dominio'), col('codigo_identificador_carga'))).drop("lista_trancode")
+            .withColumn('id_operacao',  col(column_base).substr(5, 9).cast("Long"))
+            .withColumn('codigo_identificador_carga',  col(column_base).substr(14, 15))
+            .withColumn('dominio', to_dominio(col('codigo_dominio'), col('custodia'), col('codigo_identificador_carga')))
+            .withColumn('trancode',  col(column_base).substr(29, 100000))
+            ).groupby("custodia", "codigo_dominio", "dominio", "id_operacao", "codigo_identificador_carga").agg(F.collect_set("trancode").alias('lista_trancode'))
+            ).withColumn('dados_dominio',  processar_trancode_de_dados_udf(col('lista_trancode'),col('codigo_dominio'), col('codigo_identificador_carga')))
+            .drop("lista_trancode")
+            .drop("codigo_dominio")
+            .orderBy(col("id_operacao").asc(), col("codigo_dominio").asc()))
 
 def main():
     # args = getResolvedOptions(sys.argv, ['JOB_NAME'])
     sc = SparkContext()
     glueContext = GlueContext(sc)
     spark = glueContext.spark_session
+
     job = Job(glueContext)
     # job.init(args['JOB_NAME'], args)
 
@@ -52,12 +63,32 @@ def main():
     data_frame_01.printSchema()
     data_frame_01.show()
 
-    # Load
-    data_frame_01.toPandas().to_csv('mycsv.csv')
+    dynamo_frame_transform = DynamicFrame.fromDF(data_frame_01, glueContext, "dynamic_frame")
+
+    #Load DynamoDB - Consulta Transacional
+    glueContext.write_dynamic_frame.from_options(
+        frame=dynamo_frame_transform,
+        connection_type="dynamodb",
+        connection_options={
+            "dynamodb.output.tableName": "operacoes",
+            "dynamodb.throughput.write.percent": "1.0"
+        }
+    )
+
+    # Load S3 - Democratização de Dados
+    particao = date.today()
+    glueContext.write_dynamic_frame.from_options(
+        frame=dynamo_frame_transform,
+        connection_type="s3",
+        connection_options= {
+            "path": f's3://glue-teste-joao/{particao}'
+        },
+        format="csv"
+    )
 
     job.commit()
 
-
+# Start
 main()
 
 

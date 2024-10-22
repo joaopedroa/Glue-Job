@@ -52,6 +52,8 @@ Antes de começar, verifique se você atendeu aos seguintes requisitos:
   - Ajustar a pasta .aws com suas credenciais da AWS
 - Instalar o AWS Tool Kit no Pycharm
   - https://aws.amazon.com/pt/pycharm/
+- Instalar o localstack 
+  - https://www.localstack.cloud/
 
 ## 💻 Como configurar o Pycharm?
 
@@ -69,12 +71,30 @@ Antes de começar, verifique se você atendeu aos seguintes requisitos:
   - <img src="images/Configurar_aws_pycharm.png" alt="Exemplo imagem" width="550" height="450">
   - <img src="images/aws_toolkit.png" alt="Exemplo imagem" width="550" height="450">
   
+- Configurar seu código para acessar a AWS local através do localstack
+  - Alterar o sparkSession: https://stackoverflow.com/questions/71973940/glue-to-connect-localstack-s3
+    - hadoop_conf.set("fs.s3a.impl", "org.apache.hadoop.fs.s3a.S3AFileSystem")
+    - hadoop_conf.set("fs.s3a.path.style.access", "true")
+    - hadoop_conf.set("fs.s3a.connection.ssl.enabled", "false")
+    - hadoop_conf.set("com.amazonaws.services.s3a.enableV4", "true")
+    - hadoop_conf.set("fs.s3a.aws.credentials.provider", "org.apache.hadoop.fs.s3a.TemporaryAWSCredentialsProvider")
+    - hadoop_conf.set("fs.s3a.access.key", "mock")
+    - hadoop_conf.set("fs.s3a.secret.key", "mock")
+    - hadoop_conf.set("fs.s3a.session.token", "mock")
+    - hadoop_conf.set("fs.s3a.endpoint", "http://localhost:4566")
+  
 ## 💻 Explicando o Código
 
  - Extraindo os dados de um bucket do S3
  - Processar os dados criando novas colunas
  - Inserindo os dados no DynamoDB
   
+## 💻 Exemplo do load completo
+
+![img.png](images/evidencia_dynamodb.png)
+
+![img.png](images/democratizacao.png)
+
 ## 🤝 Colaboradores
 
 Agradecemos às seguintes pessoas que contribuíram para este projeto:
