@@ -95,6 +95,15 @@ Antes de começar, verifique se você atendeu aos seguintes requisitos:
 
 ![img.png](images/democratizacao.png)
 
+## 💻 Exemplo do load completo
+
+- Para subir o Job no Glue é preciso realizar o empacotamento para distribuição dos pacotes/módulos
+  - Criar arquivo setup.py
+  - Executar comando `python setup.py bdist_wheel`
+
+Após a criação do pacote já estamos prontos para irmos para cloud AWS e executar nosso JOB.
+
+![img.png](images/cloudWatch.png)
 ## 🤝 Colaboradores
 
 Agradecemos às seguintes pessoas que contribuíram para este projeto:
