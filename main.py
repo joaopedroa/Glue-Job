@@ -9,6 +9,10 @@ from pyspark.sql import functions as F
 from datetime import datetime, timedelta
 import pytz
 
+
+
+
+
 def extract(path, transformation_ctx, glueContext):
     return (
     glueContext.create_dynamic_frame.from_options(
@@ -58,48 +62,50 @@ def main():
 
     # Extract
     dynamic_frame = extract("s3://files-joao/SF/", "dynamic_frame", glueContext)
-
+    job.commit()
     day_ago = datetime.now(pytz.timezone("America/Sao_Paulo")) +  timedelta(days=-1)
     particao_ago = day_ago.strftime("%Y-%m-%d")
 
     dynamo_frame_particao_ago = extract(f"s3://glue-teste-joao/{particao_ago}", "dynamic_frame", glueContext)
     dynamo_frame_particao_ago.show()
     # Transform
-    data_frame_00 = dynamic_frame.toDF().withColumnRenamed("col0", "trancode_mainframe")
-    data_frame_01 = transform_01(data_frame_00)
-    data_frame_02 = transform_02(data_frame_01)
-    data_frame_02.show()
-    dynamic_frame_dynamo = DynamicFrame.fromDF(data_frame_02, glueContext, "dynamic_frame")
-    data_frame_copy = data_frame_01.select(col("trancode"))
-    dynamic_frame_s3 = DynamicFrame.fromDF(data_frame_copy, glueContext, "dynamic_frame")
+    data_frame = dynamic_frame.toDF()
+    if(data_frame.isEmpty()):
+        print('Não possui dados para processamento')
+    else:
+        data_frame_00 = data_frame.withColumnRenamed("col0", "trancode_mainframe")
+        data_frame_01 = transform_01(data_frame_00)
+        data_frame_02 = transform_02(data_frame_01)
+        data_frame_02.show()
+        dynamic_frame_dynamo = DynamicFrame.fromDF(data_frame_02, glueContext, "dynamic_frame")
+        data_frame_copy = data_frame_01.select(col("trancode"))
+        dynamic_frame_s3 = DynamicFrame.fromDF(data_frame_copy, glueContext, "dynamic_frame")
 
-    #Load DynamoDB - Consulta Transacional
-    # glueContext.write_dynamic_frame.from_options(
-    #     frame=dynamic_frame_dynamo,
-    #     connection_type="dynamodb",
-    #     connection_options={
-    #         "dynamodb.output.tableName": "operacoes",
-    #         "dynamodb.throughput.write.percent": "1.0"
-    #     }
-    # )
+        #Load DynamoDB - Consulta Transacional
+        # glueContext.write_dynamic_frame.from_options(
+        #     frame=dynamic_frame_dynamo,
+        #     connection_type="dynamodb",
+        #     connection_options={
+        #         "dynamodb.output.tableName": "operacoes",
+        #         "dynamodb.throughput.write.percent": "1.0"
+        #     }
+        # )
 
-    # Load S3 - Democratização de Dados
-    particao = datetime.now(pytz.timezone("America/Sao_Paulo")).strftime("%Y-%m-%d")
-    # glueContext.write_dynamic_frame.from_options(
-    #     frame=dynamic_frame_s3,
-    #     connection_type="s3",
-    #     connection_options= {
-    #         "path": f's3://glue-teste-joao/{particao_ago}'
-    #     },
-    #     format_options={
-    #         "writeHeader": 'false',
-    #         "quoteChar": '-1',
-    #         "separator": '|'
-    #     },
-    #     format="csv"
-    # )
-
-    job.commit()
+        # Load S3 - Democratização de Dados
+        particao = datetime.now(pytz.timezone("America/Sao_Paulo")).strftime("%Y-%m-%d")
+        glueContext.write_dynamic_frame.from_options(
+            frame=dynamic_frame_s3,
+            connection_type="s3",
+            connection_options= {
+                "path": f's3://glue-teste-joao/{particao_ago}'
+            },
+            format_options={
+                "writeHeader": 'false',
+                "quoteChar": '-1',
+                "separator": '|'
+            },
+            format="csv"
+        )
 
 # Start
 main()
