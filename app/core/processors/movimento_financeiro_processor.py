@@ -3,8 +3,8 @@ from datetime import datetime
 
 
 class MovimentoFinanceiroProcessor:
-    def __init__(self, lista_trancode, codigo_identificacao_carga):
-        self.movimentos = list(map(lambda trancode: MovimentoFinanceiro(trancode, codigo_identificacao_carga), lista_trancode))
+    def __init__(self, lista_trancode, codigo_identificacao_carga, dados_todos_dominios):
+        self.movimentos = list(map(lambda trancode: MovimentoFinanceiro(trancode, codigo_identificacao_carga, dados_todos_dominios), lista_trancode))
 
     def processar(self):
         self.movimentos.sort(key=self.__ordernar_movimentos, reverse=True)

@@ -3,7 +3,7 @@ from enum import Enum
 
 class OrigemCarga(Enum):
     CARGA_ONLINE = ("Carga de 10 em 10 minutos (Online)", "s3://files-joao/SF/CARGA_ONLINE")
-    CARGA_OFFLINE = ("Carga única diária (Batch)", "s3://files-joao/SF/CARGA_OFFLINE")
+    CARGA_OFFLINE = ("Carga única diária (Batch)", "s3://files-joao/SF")
 
     def get_descricao_carga(self):
         return self.value[0]

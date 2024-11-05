@@ -5,7 +5,6 @@ from app.dataprovider.trancode_adapter import TrancodeAdapter
 from awsglue import DynamicFrame
 from awsglue.context import GlueContext
 from datetime import datetime
-from pyspark.sql.functions import col
 import pytz
 
 
@@ -25,11 +24,10 @@ class CargaOnlineStrategy():
         dynamic_frame_dynamo = DynamicFrame.fromDF(data_frame_02, self.glue_context, self.context_dynamo)
 
         self.dynamo_adapter.salvar(dynamic_frame_dynamo)
-        self.__arquivar_dados_processados(data_frame_01)
+        self.__arquivar_dados_processados(data_frame)
 
     def __arquivar_dados_processados(self, data_frame):
-        data_frame_para_arquivamento = data_frame.select(col("trancode"))
-        dynamic_frame_para_arquivamento = DynamicFrame.fromDF(data_frame_para_arquivamento, self.glue_context, self.context_s3)
+        dynamic_frame_para_arquivamento = DynamicFrame.fromDF(data_frame, self.glue_context, self.context_s3)
         particao = datetime.now(pytz.timezone("America/Sao_Paulo")).strftime("%Y-%m-%d")
         path = OrigemCarga.CARGA_ONLINE.get_path_bucket_carga_arquivamento(particao)
         self.s3_adapter.salvar(dynamic_frame_para_arquivamento, path)

@@ -1,8 +1,8 @@
 from app.core.domains.parcela import Parcela
 
 class ParcelaProcessor:
-    def __init__(self, lista_trancode, codigo_identificacao_carga):
-        self.parcelas = list(map(lambda trancode: Parcela(trancode, codigo_identificacao_carga),lista_trancode))
+    def __init__(self, lista_trancode, codigo_identificacao_carga, dados_todos_dominios):
+        self.parcelas = list(map(lambda trancode: Parcela(trancode, codigo_identificacao_carga, dados_todos_dominios),lista_trancode))
 
     def processar(self):
         self.parcelas.sort(key=self.__ordernar_parcelas)
