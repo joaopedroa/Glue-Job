@@ -104,6 +104,16 @@ Antes de começar, verifique se você atendeu aos seguintes requisitos:
 Após a criação do pacote já estamos prontos para irmos para cloud AWS e executar nosso JOB.
 
 ![img.png](images/cloudWatch.png)
+
+## 💻 Como recuperar os dados já consumidos?
+
+- Para consumir os dados é necessário ativar o job bookmark e definir um path de arquivos temporários
+- ![img.png](images/ativar_bookmark.png)
+- Após ativar todos os arquivos já processados estarão salvos no bucket temporário
+- ![img.png](images/lista_arquivos_processados.png)
+- Para encontrar o path do caminho temporario é somente usar a função no aws adapter
+- ![img.png](images/log_path_arquivos_processados.png)
+
 ## 🤝 Colaboradores
 
 Agradecemos às seguintes pessoas que contribuíram para este projeto:

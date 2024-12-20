@@ -19,3 +19,16 @@ class AwsAdapter:
         temp_dir = response['Job']['DefaultArguments']['--TempDir']
         job_run_id = self.args_glue['JOB_RUN_ID']
         return f"{temp_dir}partitionlisting/{job_name}/{job_run_id}/"
+
+    def recuperar_path_arquivos_processados_tratados(self):
+        job_name = self.args_glue['JOB_NAME']
+        response = self.glue_client.get_job(JobName=job_name)
+        temp_dir = response['Job']['DefaultArguments']['--TempDir']
+        job_run_id = self.args_glue['JOB_RUN_ID']
+        path_completo = f"{temp_dir}partitionlisting/{job_name}/{job_run_id}/"
+
+        bucket_name = temp_dir.split('/')[2]
+
+        path_arquivo_array = path_completo.split('/')[3:]
+        path_arquivo_name = '/'.join(path_arquivo_array)
+        return ArquivoProcessado(bucket_name, path_completo, path_arquivo_name)

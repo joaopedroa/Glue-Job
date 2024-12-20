@@ -1,4 +1,5 @@
 import boto3
+import json
 
 class S3Adapter:
     def __init__(self, glue_context):
@@ -18,7 +19,7 @@ class S3Adapter:
             self.glue_context.create_dynamic_frame.from_options(
                 connection_type="s3",
                 format="json",
-                format_options={"jsonPath": "$[*]"},
+                format_options={"jsonPath": "$[*]",  "multiline": True,},
                 connection_options={"paths": [path], "recurse": False},
                 transformation_ctx=transformation_ctx))
 
@@ -39,3 +40,13 @@ class S3Adapter:
 
     def excluir(self, bucket, key):
         self.s3_client.delete_object(Bucket=bucket, Key=objectkey)
+
+    def buscar_nome_arquivo_temporario(self, bucket_name, prefix):
+        response = self.s3_client.list_objects_v2(
+            Bucket=bucket_name,
+            Prefix=prefix)
+        return response['Contents'][0]['Key']
+
+    def recuperar_conteudo_arquivo_temporario(self, bucket_name, path_file):
+        response = self.s3_client.get_object(Bucket=bucket_name, Key=path_file)
+        return json.loads(result["Body"].read().decode())[0]
