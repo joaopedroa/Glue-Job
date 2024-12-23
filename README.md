@@ -95,7 +95,7 @@ Antes de começar, verifique se você atendeu aos seguintes requisitos:
 
 ![img.png](images/democratizacao.png)
 
-## 💻 Exemplo do load completo
+## 💻 Deploy job do Glue
 
 - Para subir o Job no Glue é preciso realizar o empacotamento para distribuição dos pacotes/módulos
   - Criar arquivo setup.py
@@ -114,6 +114,11 @@ Após a criação do pacote já estamos prontos para irmos para cloud AWS e exec
 - Para encontrar o path do caminho temporario é somente usar a função no aws adapter
 - ![img.png](images/log_path_arquivos_processados.png)
 
+## 💻 Como mover os arquivos já processados?
+
+- Primeiro precisamos encontrar os caminhos necessários
+- ![img.png](images/exemplo_listagem_arquivos.png)
+- 
 ## 🤝 Colaboradores
 
 Agradecemos às seguintes pessoas que contribuíram para este projeto:

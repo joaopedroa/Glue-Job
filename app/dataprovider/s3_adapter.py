@@ -5,6 +5,7 @@ class S3Adapter:
     def __init__(self, glue_context):
         self.glue_context = glue_context
         self.s3_client = boto3.client('s3')
+        self.s3_resource = boto3.resource('s3')
 
     def extrair_csv(self, path, transformation_ctx):
         return (
@@ -38,8 +39,15 @@ class S3Adapter:
             format="csv"
         )
 
-    def excluir(self, bucket, key):
-        self.s3_client.delete_object(Bucket=bucket, Key=objectkey)
+
+    def mover_arquivo(self, bucket, origin_path, target_path):
+        copy_source = {
+            'Bucket': bucket,
+            'Key': origin_path
+        }
+        self.s3_resource.meta.client.copy(copy_source, Bucket=bucket, Key=target_path)
+        self.s3_client.delete_object(Bucket=bucket, Key=origin_path)
+
 
     def buscar_nome_arquivo_temporario(self, bucket_name, prefix):
         response = self.s3_client.list_objects_v2(
