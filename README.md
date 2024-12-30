@@ -118,7 +118,31 @@ Após a criação do pacote já estamos prontos para irmos para cloud AWS e exec
 
 - Primeiro precisamos encontrar os caminhos necessários
 - ![img.png](images/exemplo_listagem_arquivos.png)
-- 
+
+
+## 💻 Democratização
+
+- Criar o database e tabelas no Glue Data Catalog
+- Adicionar nova propriedade da tabela para que possa criar as novas particições
+  - useGlueParquetWriter: true
+  3 - Adicionar código
+```python
+glue_context.write_dynamic_frame_from_catalog(
+    frame=dynamicFrame,
+    database="database",
+    table_name ='table_name',
+    transformation_ctx = "write_sink",
+    additional_options={
+        "enableUpdateCatalog": True,
+        "updateBehavior": "LOG",
+        "partitionKeys":  ["data_versao", "id_carga"],
+        "compression": "snappy"
+    }
+)
+```
+- Documentação: https://docs.aws.amazon.com/glue/latest/dg/update-from-job.html
+- OBS: As partitions keys precisam estar na mesma ordem no schema da tabela
+ 
 ## 🤝 Colaboradores
 
 Agradecemos às seguintes pessoas que contribuíram para este projeto:
