@@ -4,15 +4,10 @@ from datetime import datetime
 
 class MovimentoFinanceiroProcessor:
     def __init__(self, lista_trancode, codigo_identificacao_carga, dados_todos_dominios):
-        self.movimentos = list(map(lambda trancode: MovimentoFinanceiro(trancode, codigo_identificacao_carga, dados_todos_dominios), lista_trancode))
+        self.movimento = MovimentoFinanceiro().trancode_to_object(lista_trancode, codigo_identificacao_carga, dados_todos_dominios).to_json()
 
     def processar(self):
-        self.movimentos.sort(key=self.__ordernar_movimentos, reverse=True)
-        return list(map(lambda movimento: movimento.to_json(), self.movimentos))
-
-    def __ordernar_movimentos(self, movimento_financeiro:MovimentoFinanceiro):
-        return datetime.strptime(movimento_financeiro.data_evento,"%Y-%m-%d")
-
+        return self.movimento
 
 
 
