@@ -1,4 +1,13 @@
+from app.core.domains.movimento_financeiro import MovimentoFinanceiro
+from app.core.domains.operacao import Operacao
+from app.core.domains.originacao import Originacao
+from app.core.enums.dominio_enum import Dominio
 from app.core.enums.origem_carga import OrigemCarga
+from app.core.strategies.democratizacao.metadata_democratizer import MetadataDemocratizer
+from app.core.strategies.democratizacao.movimento_financeiro_democratizer import MovimentoFinanceiroDemocratizer
+from app.core.strategies.democratizacao.operacao_democratizer import OperacaoDemocratizer
+from app.core.strategies.democratizacao.originacao_democratizer import OriginacaoDemocratizer
+from app.core.strategies.democratizacao.parcela_democratizer import ParcelaDemocratizer
 # from app.dataprovider.dynamo_adapter import DynamoAdapter
 # from app.dataprovider.s3_adapter import S3Adapter
 from app.dataprovider.trancode_adapter import TrancodeAdapter
@@ -6,6 +15,8 @@ from app.dataprovider.trancode_adapter import TrancodeAdapter
 # from awsglue.context import GlueContext
 from datetime import datetime
 import pytz
+from pyspark.sql.functions import explode
+from pyspark.sql.functions import col, udf
 
 class CargaOfflineStrategy():
     def __init__(self, context_dynamo, context_s3, glue_context, trancode_adapter: TrancodeAdapter, dynamo_adapter, s3_adapter):
@@ -23,6 +34,14 @@ class CargaOfflineStrategy():
         data_frame_02 = self.trancode_adapter.transformar_dados_trancode_body(data_frame_01)
         data_frame_02.show()
         data_frame_02.toPandas().to_csv('mycsv.csv')
+
+
+        for dominio in Dominio:
+            print(f'Código do domínio é {dominio.value[0]}')
+            data_frame_democratizacao = data_frame_02.filter(data_frame_02.codigo_dominio == dominio.value[0])
+            dominio.choose_method_democratizer(data_frame_democratizacao).democratizar()
+
+
         # dynamic_frame_dynamo = DynamicFrame.fromDF(data_frame_02, self.glue_context, self.context_dynamo)
         # data_frame_02.toPandas().to_csv('mycsv.csv')
         # self.dynamo_adapter.salvar(dynamic_frame_dynamo)

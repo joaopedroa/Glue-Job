@@ -67,7 +67,6 @@ class TrancodeAdapter:
                 .withColumn('dados_dominio',
                             organizar_trancode_de_dados_udf(col('codigo_dominio'), col('lista_dados_dominio')))
                 .drop("lista_dados_dominio")
-                .drop("codigo_dominio")
                 .drop("dados_todos_dominios")
                 .orderBy(col("id_operacao").asc(), col("codigo_dominio").asc())
                 )
