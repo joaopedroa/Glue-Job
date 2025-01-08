@@ -1,23 +1,29 @@
 import json
 
+from app.core.dtos.dados import Dados
+
+
 class Metadata:
 
     def __init__(self,
                  codigo_identificacao_carga=None,
                  quantidade_parcelas=None,
                  quantidade_movimentos_financeiros=None,
-                 quantidade_parcelas_recebidas=None
+                 quantidade_parcelas_recebidas=None,
+                 lista=None,
                  ):
         self.codigo_identificacao_carga = codigo_identificacao_carga
         self.quantidade_parcelas = quantidade_parcelas
         self.quantidade_movimentos_financeiros = quantidade_movimentos_financeiros
         self.quantidade_parcelas_recebidas = quantidade_parcelas_recebidas
+        self.lista = lista
 
     def trancode_to_object(self, trancode, codigo_identificacao_carga, dados_todos_dominios):
         self.codigo_identificacao_carga = codigo_identificacao_carga
         self.quantidade_parcelas = int(trancode[0:3])
         self.quantidade_movimentos_financeiros = int(trancode[3:6])
         self.quantidade_parcelas_recebidas = self.__recuperar_dados_parcelas(dados_todos_dominios)
+        self.lista = [Dados("João", 28).to_json(), Dados("Thais", 29).to_json()]
         return self
 
     def to_json(self):

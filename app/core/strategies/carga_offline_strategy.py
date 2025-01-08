@@ -35,11 +35,14 @@ class CargaOfflineStrategy():
         data_frame_02.show()
         data_frame_02.toPandas().to_csv('mycsv.csv')
 
+        data_frame_democratizacao = data_frame_02.filter(data_frame_02.codigo_dominio == Dominio.METADATA.value[0])
+        MetadataDemocratizer(data_frame_democratizacao).democratizar()
+        # Dominio.METADATA.choose_method_democratizer(data_frame_democratizacao).democratizar()
 
-        for dominio in Dominio:
-            print(f'Código do domínio é {dominio.value[0]}')
-            data_frame_democratizacao = data_frame_02.filter(data_frame_02.codigo_dominio == dominio.value[0])
-            dominio.choose_method_democratizer(data_frame_democratizacao).democratizar()
+        # for dominio in Dominio:
+        #     print(f'Código do domínio é {dominio.value[0]}')
+        #     data_frame_democratizacao = data_frame_02.filter(data_frame_02.codigo_dominio == dominio.value[0])
+        #     dominio.choose_method_democratizer(data_frame_democratizacao).democratizar()
 
 
         # dynamic_frame_dynamo = DynamicFrame.fromDF(data_frame_02, self.glue_context, self.context_dynamo)
