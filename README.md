@@ -143,6 +143,30 @@ glue_context.write_dynamic_frame_from_catalog(
 - Documentação: https://docs.aws.amazon.com/glue/latest/dg/update-from-job.html
 - OBS: As partitions keys precisam estar na mesma ordem no schema da tabela
  
+## 💻 Observabilidade
+
+- Criar regra no event bridge para capturar eventos de falha, erro ou timeout
+- Padrão de eventos:
+```json
+{
+  "source": ["aws.glue"],
+  "detail-type": ["Glue Job State Change"],
+  "detail": {
+    "state": ["FAILED", "TIMEOUT", "ERROR"],
+    "jobName": ["jobName"]
+  }
+}
+```
+- Criar filtro de métrica para criar métrica no cloudwatch
+```json
+{ ($.source = "aws.glue") && ($.detail.jobName= "jobName") }
+```
+- Dimensions da métrica: 
+  - job.name:$.detail.jobName 
+  - job.run.id:$.detail.jobRunId
+  - state:$.detail.state
+
+
 ## 🤝 Colaboradores
 
 Agradecemos às seguintes pessoas que contribuíram para este projeto:
