@@ -1,6 +1,7 @@
 import json
 
-class Parcela:
+
+class ParcelaControleIof:
 
     def __init__(self,
                  custodia=None,
@@ -8,13 +9,15 @@ class Parcela:
                  numero_plano=None,
                  numero_parcela=None,
                  data_vencimento_parcela=None,
-                 codigo_identificacao_carga=None):
+                 codigo_identificacao_carga=None,
+                 controle_iof=None):
         self.custodia = custodia
         self.id_operacao = id_operacao
         self.numero_plano = numero_plano
         self.numero_parcela = numero_parcela
         self.data_vencimento_parcela = data_vencimento_parcela
         self.codigo_identificacao_carga = codigo_identificacao_carga
+        self.controle_iof = controle_iof
 
     def trancode_to_object(self, trancode, codigo_identificacao_carga, dados_todos_dominios):
         self.custodia = trancode[0:2]
@@ -22,9 +25,12 @@ class Parcela:
         self.numero_plano = trancode[11:13]
         self.numero_parcela = trancode[11:13]
         self.data_vencimento_parcela = trancode[13:23]
-        self.codigo_identificacao_carga = codigo_identificacao_carga
+        self.codigo_identificacao_carga = codigo_identificacao_carga,
+        self.controle_iof = self.to_controle_iof()
         return self
-
 
     def to_json(self):
         return json.dumps(self.__dict__)
+
+    def to_controle_iof(self):
+        return []

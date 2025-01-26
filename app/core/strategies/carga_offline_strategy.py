@@ -32,11 +32,11 @@ class CargaOfflineStrategy():
         data_frame_01 = self.trancode_adapter.transformar_dados_trancode_header(data_frame)
         data_frame_01.show()
         data_frame_02 = self.trancode_adapter.transformar_dados_trancode_body(data_frame_01)
-        data_frame_02.show()
+        data_frame_02.show(truncate=False)
         data_frame_02.toPandas().to_csv('mycsv.csv')
 
         data_frame_democratizacao = data_frame_02.filter(data_frame_02.codigo_dominio == Dominio.METADATA.value[0])
-        MetadataDemocratizer(data_frame_democratizacao).democratizar()
+       # MetadataDemocratizer(data_frame_democratizacao).democratizar()
         # Dominio.METADATA.choose_method_democratizer(data_frame_democratizacao).democratizar()
 
         # for dominio in Dominio:

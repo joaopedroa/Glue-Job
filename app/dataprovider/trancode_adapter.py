@@ -1,10 +1,13 @@
-from pyspark.sql.functions import col, udf
-from pyspark.sql.types import StringType
+from pyspark.sql.functions import col, udf, expr, when, explode_outer
+from pyspark.sql.types import StringType, BooleanType
 from pyspark.sql import functions as F
 from pyspark.sql.window import Window
 
 from app.core.dtos.dominio_dto import DominioDTO
 from app.core.enums.dominio_enum import Dominio
+from pyspark.sql.functions import from_json
+from pyspark.sql.functions import explode
+from pyspark.sql.types import MapType, StringType, ArrayType, StructType, StructField
 
 
 class TrancodeAdapter:
@@ -19,6 +22,7 @@ class TrancodeAdapter:
             lambda codigo_dominio, custodia, codigo_identificador_carga: self.__to_dominio(codigo_dominio, custodia,
                                                                                            codigo_identificador_carga),
             StringType())
+
         to_dominio_enum_udf = udf(lambda codigo_dominio: str(Dominio.get_instance(codigo_dominio).name), StringType())
 
         column_list = ["id_operacao", "codigo_identificador_carga"]
@@ -35,6 +39,14 @@ class TrancodeAdapter:
         processar_trancode_de_dados_udf = udf(lambda trancode, codigo_dominio, codigo_identificador_carga,
                                                      dados_todos_dominios: self.__processar_trancode_de_dados(
             trancode, codigo_dominio, codigo_identificador_carga, dados_todos_dominios), StringType())
+
+        schema = ArrayType(StructType([
+            StructField("is_controle_iof", BooleanType(), True)
+        ]))
+
+        to_parcela_controle_iof = udf(
+            lambda dados_dominio, dominio_enum: self.__to_parcela_controle_iof(dados_dominio, dominio_enum),
+            StringType())
 
         return ((data_frame
                  .withColumn('custodia', col(column_base).substr(0, 2))
@@ -53,6 +65,17 @@ class TrancodeAdapter:
                              processar_trancode_de_dados_udf(col('trancode'), col('codigo_dominio'),
                                                              col('codigo_identificador_carga'),
                                                              col('dados_todos_dominios')))
+                 .withColumn('teste', explode_outer(
+            from_json(to_parcela_controle_iof(col('dados_dominio'), col('dominio_enum')), schema)))
+                 .withColumn('codigo_dominio',
+                             when(col('teste.is_controle_iof'), 100).otherwise(col('codigo_dominio')))
+                 .withColumn('dominio_enum',
+                             when(col('teste.is_controle_iof'), Dominio.PARCELA_CONTROLE_IOF.name).otherwise(
+                                 col('dominio_enum')))
+                 .withColumn('dominio',
+                             when(col('teste.is_controle_iof'), to_dominio_udf(col('codigo_dominio'), col('custodia'),
+                                                                               col('codigo_identificador_carga'))).otherwise(
+                                 col('dominio')))
                  ))
 
     def transformar_dados_trancode_body(self, data_frame):
@@ -70,6 +93,11 @@ class TrancodeAdapter:
                 .drop("dados_todos_dominios")
                 .orderBy(col("id_operacao").asc(), col("codigo_dominio").asc())
                 )
+
+    def __to_parcela_controle_iof(self, dados_dominio, dominio_enum):
+        if (dominio_enum == 'PARCELA'):
+            return "[{'is_controle_iof': false}, {'is_controle_iof': true}]"
+        return []
 
     def __to_dominio(self, codigo_dominio, custodia, codigo_identificador_carga):
         return Dominio.get_instance(codigo_dominio).name + "#" + custodia + "#" + codigo_identificador_carga

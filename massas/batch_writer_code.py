@@ -10,7 +10,7 @@
 # distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
-
+from boto3 import att
 link = 'https://github.com/boto/boto3/blob/develop/boto3/dynamodb/table.py#L141'
 import logging
 
@@ -144,7 +144,8 @@ class BatchWriter:
         items_to_send = self._items_buffer[: self._flush_amount]
         self._items_buffer = self._items_buffer[self._flush_amount :]
         response = self._client.batch_write_item(
-            RequestItems={self._table_name: items_to_send}
+            RequestItems={self._table_name: items_to_send},
+            ConditionExpression=Attr('version').eq(previous_version)
         )
         unprocessed_items = response['UnprocessedItems']
         if not unprocessed_items:
