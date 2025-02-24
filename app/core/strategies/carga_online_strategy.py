@@ -17,10 +17,10 @@ class CargaOnlineStrategy():
         self.dynamo_adapter = dynamo_adapter
         self.s3_adapter = s3_adapter
 
-    def processar(self, data_frame):
-        data_frame_01 = self.trancode_adapter.transformar_dados_trancode_header(data_frame)
-        data_frame_02 = self.trancode_adapter.transformar_dados_trancode_body(data_frame_01)
-
+    def processar(self, data_frame, spark):
+        data_frame_01 = None# self.trancode_adapter.transformar_dados_trancode_header(data_frame)
+        # data_frame_02 = self.trancode_adapter.transformar_dados_trancode_body(data_frame_01)
+        # print(f'numero de particoes = {data_frame.rdd.getNumPartitions()}')
         # dynamic_frame_dynamo = DynamicFrame.fromDF(data_frame_02, self.glue_context, self.context_dynamo)
 
         # self.dynamo_adapter.salvar(dynamic_frame_dynamo)

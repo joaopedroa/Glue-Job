@@ -15,6 +15,71 @@ class TrancodeAdapter:
     def __init__(self):
         pass
 
+    def recuperar_data_frame_base(self, data_frame, spark):
+        data_frame.createOrReplaceTempView("tb_base")
+        return spark.sql("""
+                   SELECT 
+                       SUBSTRING(trancode_mainframe, 1, 2) as custodia,
+                       INT(SUBSTRING(trancode_mainframe, 3, 2)) as codigo_dominio,
+                       SUBSTRING(trancode_mainframe, 4, 9) as id_operacao,
+                       SUBSTRING(trancode_mainframe, 14, 15) as codigo_identificador_carga,
+                       CASE SUBSTRING(trancode_mainframe, 3, 2)
+                           WHEN 99 THEN 'METADATA'
+                           WHEN 1 THEN 'OPERACAO'
+                           WHEN 2 THEN 'ORIGINACAO'
+                           WHEN 3 THEN 'PARCELA'
+                           WHEN 100 THEN 'PARCELA_CONTROLE_IOF'
+                           WHEN 4 THEN 'MOVIMENTO_FINANCEIRO'
+                           ELSE 'NAO_ENCONTRADO'
+                       END as dominio_enum,
+                       CASE SUBSTRING(trancode_mainframe, 3, 2)
+                           WHEN 99 THEN CONCAT('METADATA', '#', SUBSTRING(trancode_mainframe, 1, 2), '#', SUBSTRING(trancode_mainframe, 14, 15))
+                           WHEN 1 THEN CONCAT('OPERACAO', '#', SUBSTRING(trancode_mainframe, 1, 2), '#', SUBSTRING(trancode_mainframe, 14, 15))
+                           WHEN 2 THEN CONCAT('ORIGINACAO', '#', SUBSTRING(trancode_mainframe, 1, 2), '#', SUBSTRING(trancode_mainframe, 14, 15))
+                           WHEN 3 THEN CONCAT('PARCELA', '#', SUBSTRING(trancode_mainframe, 1, 2), '#', SUBSTRING(trancode_mainframe, 14, 15))
+                           WHEN 100 THEN CONCAT('PARCELA_CONTROLE_IOF', '#', SUBSTRING(trancode_mainframe, 1, 2), '#', SUBSTRING(trancode_mainframe, 14, 15))
+                           WHEN 4 THEN CONCAT('MOVIMENTO_FINANCEIRO', '#', SUBSTRING(trancode_mainframe, 1, 2), '#', SUBSTRING(trancode_mainframe, 14, 15))
+                           ELSE CONCAT('NAO_ENCONTRADO', '#', SUBSTRING(trancode_mainframe, 1, 2), '#', SUBSTRING(trancode_mainframe, 14, 15))
+                       END as dominio,
+                       SUBSTRING(trancode_mainframe, 29) as trancode
+                   FROM tb_base
+               """)
+    def transformar_dados_trancode_header_operacoes(self, data_frame, spark):
+        data_frame.createOrReplaceTempView("tb_operacoes")
+        return spark.sql("""
+                    SELECT 
+                        tb_operacoes.*,
+                        CASE codigo_dominio
+                           WHEN 1 THEN SUBSTRING(trancode, 12, 10) 
+                           ELSE null
+                       END as data_contratacao,
+                       CASE codigo_dominio
+                           WHEN 3 THEN SUBSTRING(trancode, 12, 2) 
+                           ELSE null
+                       END as numero_parcela,
+                        CASE codigo_dominio
+                           WHEN 3 THEN SUBSTRING(trancode, 12, 2) 
+                           ELSE null
+                       END as numero_plano,
+                        CASE codigo_dominio
+                           WHEN 3 THEN SUBSTRING(trancode, 14, 10) 
+                           ELSE null
+                       END as data_vencimento_parcela,
+                        CASE codigo_dominio
+                           WHEN 2 THEN SUBSTRING(trancode, 12, 12) 
+                           ELSE null
+                       END as meio_recebimento_valor,
+                        CASE codigo_dominio
+                           WHEN 4 THEN SUBSTRING(trancode, 12, 3) 
+                           ELSE null
+                       END as id_evento,
+                        CASE codigo_dominio
+                           WHEN 4 THEN SUBSTRING(trancode, 15, 10) 
+                           ELSE null
+                       END as data_evento
+                    FROM tb_operacoes
+                """)
+
     def transformar_dados_trancode_header(self, data_frame):
         column_base = 'trancode_mainframe'
 
@@ -59,23 +124,23 @@ class TrancodeAdapter:
                                             col('codigo_identificador_carga')))
                  .withColumn('trancode', col(column_base).substr(29, 100000))
                  .withColumn('lista_trancode', F.collect_set("trancode").over(window_spec2))
-                 .withColumn('dados_todos_dominios', F.collect_set(
-            processar_todos_dados_dominios(col('dominio_enum'), col('lista_trancode'))).over(window_spec))
-                 .withColumn('dados_dominio',
-                             processar_trancode_de_dados_udf(col('trancode'), col('codigo_dominio'),
-                                                             col('codigo_identificador_carga'),
-                                                             col('dados_todos_dominios')))
-                 .withColumn('teste', explode_outer(
-            from_json(to_parcela_controle_iof(col('dados_dominio'), col('dominio_enum')), schema)))
-                 .withColumn('codigo_dominio',
-                             when(col('teste.is_controle_iof'), 100).otherwise(col('codigo_dominio')))
-                 .withColumn('dominio_enum',
-                             when(col('teste.is_controle_iof'), Dominio.PARCELA_CONTROLE_IOF.name).otherwise(
-                                 col('dominio_enum')))
-                 .withColumn('dominio',
-                             when(col('teste.is_controle_iof'), to_dominio_udf(col('codigo_dominio'), col('custodia'),
-                                                                               col('codigo_identificador_carga'))).otherwise(
-                                 col('dominio')))
+            #      .withColumn('dados_todos_dominios', F.collect_set(
+            # processar_todos_dados_dominios(col('dominio_enum'), col('lista_trancode'))).over(window_spec))
+            #      .withColumn('dados_dominio',
+            #                  processar_trancode_de_dados_udf(col('trancode'), col('codigo_dominio'),
+            #                                                  col('codigo_identificador_carga'),
+            #                                                  col('dados_todos_dominios')))
+            #      .withColumn('teste', explode_outer(
+            # from_json(to_parcela_controle_iof(col('dados_dominio'), col('dominio_enum')), schema)))
+            #      .withColumn('codigo_dominio',
+            #                  when(col('teste.is_controle_iof'), 100).otherwise(col('codigo_dominio')))
+            #      .withColumn('dominio_enum',
+            #                  when(col('teste.is_controle_iof'), Dominio.PARCELA_CONTROLE_IOF.name).otherwise(
+            #                      col('dominio_enum')))
+            #      .withColumn('dominio',
+            #                  when(col('teste.is_controle_iof'), to_dominio_udf(col('codigo_dominio'), col('custodia'),
+            #                                                                    col('codigo_identificador_carga'))).otherwise(
+            #                      col('dominio')))
                  ))
 
     def transformar_dados_trancode_body(self, data_frame):

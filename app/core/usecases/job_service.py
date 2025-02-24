@@ -63,7 +63,7 @@ class JobService:
         else:
             self.logger.log(f"Iniciando processamento de estrategia")
             data_frame = data_frame.withColumnRenamed("_c0", "trancode_mainframe")
-            self.carga_strategy_map[origem_carga].processar(data_frame)
+            self.carga_strategy_map[origem_carga].processar(data_frame, spark)
             self.logger.log(f"Processamento de estrategia finalizada com sucesso")
 
             # arquivos_processados = self.aws_adapter.recuperar_path_arquivos_processados()

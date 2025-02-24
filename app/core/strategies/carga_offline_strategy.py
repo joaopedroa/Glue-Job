@@ -11,6 +11,7 @@ from app.core.strategies.democratizacao.parcela_democratizer import ParcelaDemoc
 # from app.dataprovider.dynamo_adapter import DynamoAdapter
 # from app.dataprovider.s3_adapter import S3Adapter
 from app.dataprovider.trancode_adapter import TrancodeAdapter
+import time
 # from awsglue import DynamicFrame
 # from awsglue.context import GlueContext
 from datetime import datetime
@@ -27,15 +28,24 @@ class CargaOfflineStrategy():
         self.dynamo_adapter = dynamo_adapter
         self.s3_adapter = s3_adapter
 
-    def processar(self, data_frame):
+    def processar(self, data_frame, spark):
         data_frame.show()
-        data_frame_01 = self.trancode_adapter.transformar_dados_trancode_header(data_frame)
-        data_frame_01.show()
-        data_frame_02 = self.trancode_adapter.transformar_dados_trancode_body(data_frame_01)
-        data_frame_02.show(truncate=False)
-        data_frame_02.toPandas().to_csv('mycsv.csv')
+        start_time = time.time()
+        data_frame_base = self.trancode_adapter.recuperar_data_frame_base(data_frame, spark)
+        data_frame_base.show()
+        data_frame_01 = self.trancode_adapter.transformar_dados_trancode_header_operacoes(data_frame_base, spark)
+        data_frame_01.show(100)
 
-        data_frame_democratizacao = data_frame_02.filter(data_frame_02.codigo_dominio == Dominio.METADATA.value[0])
+
+        print("--- %s seconds ---" % (time.time() - start_time))
+        # data_frame_01.show()
+        # data_frame_02 = self.trancode_adapter.transformar_dados_trancode_body(data_frame_01)
+        # data_frame_02.show(truncate=False)
+        # data_frame_02.toPandas().to_csv('mycsv.csv')
+        # data_frame_02.repartition(100)
+        # print(f'numero de particoes = {data_frame.rdd.getNumPartitions()}')
+        #
+        # data_frame_democratizacao = data_frame_02.filter(data_frame_02.codigo_dominio == Dominio.METADATA.value[0])
        # MetadataDemocratizer(data_frame_democratizacao).democratizar()
         # Dominio.METADATA.choose_method_democratizer(data_frame_democratizacao).democratizar()
 
