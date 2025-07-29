@@ -159,3 +159,69 @@ Agradecemos às seguintes pessoas que contribuíram para este projeto:
     </td>
   </tr>
 </table>
+
+
+
+
+
+
+import time
+from tqdm import tqdm
+
+def processar_arquivo_grande_otimizado(nome_arquivo):
+    """Processamento otimizado com chunks"""
+    
+    chunk_size = 10000
+    inicio = time.time()
+    
+    print(f"Iniciando processamento de {nome_arquivo}")
+    print(f"Tamanho do chunk: {chunk_size:,} linhas")
+    
+    # Conta linhas
+    total_linhas = sum(1 for _ in open(nome_arquivo))
+    print(f"Total de linhas: {total_linhas:,}")
+    
+    # Processa em chunks
+    chunks_processados = 0
+    linhas_processadas = 0
+    
+    with open('resultado.txt', 'w') as saida:
+        with open(nome_arquivo, 'r') as entrada:
+            chunk = []
+            
+            for linha in tqdm(entrada, total=total_linhas, desc="Processando"):
+                chunk.append(linha.strip())
+                linhas_processadas += 1
+                
+                if len(chunk) >= chunk_size:
+                    # Processa chunk
+                    for resultado in processar_chunk(chunk):
+                        saida.write(resultado + '\n')
+                    
+                    chunks_processados += 1
+                    chunk = []  # Limpa para próximo chunk
+            
+            # Processa último chunk
+            if chunk:
+                for resultado in processar_chunk(chunk):
+                    saida.write(resultado + '\n')
+                chunks_processados += 1
+    
+    tempo_total = time.time() - inicio
+    print(f"\nProcessamento concluído!")
+    print(f"Chunks processados: {chunks_processados}")
+    print(f"Linhas processadas: {linhas_processadas:,}")
+    print(f"Tempo total: {tempo_total:.2f} segundos")
+    print(f"Velocidade: {linhas_processadas/tempo_total:.0f} linhas/segundo")
+
+def processar_chunk(chunk):
+    """Processa um chunk de linhas"""
+    resultados = []
+    for linha in chunk:
+        # Seu processamento aqui
+        resultado = linha.upper()  # Exemplo simples
+        resultados.append(resultado)
+    return resultados
+
+# Uso
+processar_arquivo_grande_otimizado('arquivo_grande.txt')
