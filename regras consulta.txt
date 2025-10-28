@@ -1,0 +1,212 @@
+A consulta de operações Lazy tem como objetivo reduzir o custo com o Mainframe.
+
+Foram criadas três novas estratégia para redirecionar as requisiçoes do clientes da rota "/emprestimos/tuctuuc/operacoes":
+
+	CONSULTA_OPERACAO_OTIMIZADA
+	CONSULTA_CLIENTE_OTIMIZADA
+	CONSULTA_CONTA_OTIMIZADA
+	
+Observação: A consulta por conta agora está recuperando os dados da conta do CC e passando o numero unico do cliente.
+
+Ao realizar a consulta, recuperamos as configuracoes do portal manager e verificamos se o cliente está apto a realizar chamadas para a consulta otimizada e não para o mainframe:
+
+	- Nome da toggle para ativar o fluxo: toggle.consulta-otimizada-ativa
+
+Na sequencia também verificamos se o cliente possui regra ativa no portal manager:
+
+	Objeto customizado do portal manager: config.regras-piloto-consulta-otimizada:
+	Payload:
+	
+		{
+			"configuracoes": [
+				{
+					"id_cliente": "UUID"
+					"estrategias: [
+						{
+							"nome": "RDG",
+							"valor": "01,03,03"
+						}
+					],
+					"custodias_mainframe": ["SF", "F5", "NSF", "U2"],
+					"custodias_dynamo": ["SF", "F5", "NSF", "U2"],
+					"produtos_nao_elegiveis": [1,2,3,4]
+					"status": "ATIVO"
+				}
+			]
+		}
+		
+OBS: Estratégias disponiveis:
+	- RDG
+	- ULTIMO_DIGITO_OPERACAO
+	- DAC
+		
+OBS: Caso exista uma configuração cujo o id_cliente seja "ALL" e esteja ATIVO, iremos usar as configurações de ALL (Pois possui maior prioridade)
+Após recuperar os dados, seguem regras:
+
+- Sempre verificamos na primeira elegibildade se o tipo de consulta está ativo no portal manager
+	- TIPO_CONSULTA_OPERACAO
+	- TIPO_CONSULTA_CLIENTE
+	- TIPO_CONSULTA_CONTA
+
+	- OPERACAO
+		- Verifica se possui regra por Dois últimos digitos da operacao
+			- Verificar se cliente está apto para a consulta otimizada
+				- Caso não elegivel, acionar fallback para consulta mainframe
+				- Caso elegível, realizar chamada HTTP para a consulta otimizada via load balancer
+					- Caso consulta otimizada não retorne dados:
+						- Deverá ser verificado se possui indicação no Redis para verificar se operação não existe no mainframe	
+							- Caso não exista, retornar status code 404, informando que operação não foi encontrada.
+								OBS: Isso evita irmos no mainframe desnecessariamente economizando MIPS
+							- Caso exista, iremos verificar quais custodias o cliente pode ou quer acessar
+								- Filtramos apenas as custodias necessárias e acionamos o fluxo de fallback mainframe
+								OBS: Buscamos apenas os dados que o cliente deseja acessar, economizando recursos do mainframe
+							- Após recuperar os dados do mainframe
+								- Se retornou dados, então enviamos um comando para atualizar a operação
+								- Se não retornou dados, colocamos no cache Redis indicando que não possui dados
+								OBS: Isso serve para evitarmos irmos até o mainframe desnecessariamente
+							- Finalizar retornando os dados do cliente
+					- Caso consulta otimizada retorne dados
+						- Então vamos aplicar as regras de elegibilidade do piloto:
+							- Custodia está liberada no portal manager?
+							- Produto financeiro liberado no portal manager?
+							- Se a operação for F5
+								- Então verificamos no redis se ela está liberada
+								OBS: O redis possui um TTL até 00:00 do dia atual.
+								OBS: O fluxo considera apto se a operação estiver marcada no mesmo dia que a data da consulta
+									- Caso a data da consulta seja a mesma do dia
+										- Vericar se a marcacao foi entre 00:00 e 06:00 e a consulta foi posterior as 06:00
+											- Caso seja
+												- Então iremos considerar nao elegivel e buscar os dados no mainframe
+											- Caso não seja
+												- Entao iremos considerar elegivel
+						- Caso todas as regras sejam verdadeiras
+							- Entao devolvemos o retorno para o cliente com 0 custos de MIPS
+							
+	- CLIENTE
+		- Verifica se possui regra por RDG no cpf ou cnpj
+			- Caso não elegivel, acionar fallback para consulta mainframe
+			- Caso elegível, realizar chamada HTTP para a consulta otimizada via load balancer
+				- Caso consulta otimizada não retorne dados:
+					- Deverá ser verificado se possui indicação no Redis para verificar se id_cliente não possui nenhuma operação para as custodias necessárias	
+					- Caso não exista, retornar lista vazia, informando que operação não foi encontrada.
+						OBS: Para a consulta por cliente não retornamos o status code 404
+						OBS: Isso evita irmos no mainframe desnecessariamente economizando MIPS
+					- Caso exista, iremos verificar quais custodias o cliente pode ou quer acessar
+						- Filtramos apenas as custodias necessárias e acionamos o fluxo de fallback mainframe
+						OBS: Buscamos apenas os dados que o cliente deseja acessar, economizando recursos do mainframe
+						- Após recuperar os dados do mainframe
+							- Se retornou dados
+								- Então verificamos quais custodias solicitadas nao possui dados no mainframe
+									- Atualizamos o redis indicando que aquela custodia X para aquele cliente Y não possui dados
+									OBS: Isso evita irmos no mainframe desnecessariamente na próxima chamada economizando MIPS
+								- Enviamos um comando para atualizar a operação no dynamodb
+								- Finalizar retornando os dados do cliente
+							- Se nao retornou dados
+								- Atualizamos o redis indicando que aquela custodia X para aquele cliente Y não possui dados
+									OBS: Isso evita irmos no mainframe desnecessariamente na próxima chamada economizando MIPS
+								- Finalizar retornando os dados vazios para o cliente
+				- Caso consulta otimizada retorne os dados:
+					- Então vamos aplicar as regras de elegibilidade do piloto para cada operação retornada:
+						- Custodia está liberada no portal manager?
+						- Produto financeiro liberado no portal manager?
+						- Se a operação for F5
+							- Então verificamos no redis se ela está liberada
+							OBS: O redis possui um TTL até 00:00 do dia atual.
+							OBS: O fluxo considera apto se a operação estiver marcada no mesmo dia que a data da consulta
+								- Caso a data da consulta seja a mesma do dia
+									- Vericar se a marcacao foi entre 00:00 e 06:00 e a consulta foi posterior as 06:00
+										- Caso seja
+											- Então iremos considerar nao elegivel e buscar os dados no mainframe
+										- Caso não seja
+											- Entao iremos considerar elegivel
+					- Após aplicar todas as regras
+						- Criar lista com operacoes elegiveis e nao elegiveis
+							- Se todas as operacoes forem elegiveis
+								- retorna lista de operações para o cliente
+								- OBS: A validação se estamos ou não esquecendo alguma operação fica na responsabilidade do Glue Job de Validação
+								
+							- Se houver operações não elegíveis
+								- Remover as custodias nao elegiveis da lista de retorno e realizar chamada ao mainframe para custodias necessárias
+									- Se mainframe nao retornou dados
+										- Atualizamos o redis indicando que aquela custodia X para aquele cliente Y não possui dados
+										OBS: Isso evita irmos no mainframe desnecessariamente na próxima chamada economizando MIPS
+									- Se mainframe retornou dados
+										- Enviar comando para atualização das operaçoes
+									- retornar resposta para cliente
+								
+					
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
+			
