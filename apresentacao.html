@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case – Nova Consulta de Operações 100% AWS</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #003366;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            display: none;
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 50px;
+            position: relative;
+            animation: slideIn 0.5s ease-out;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .slide-header {
+            padding: 25px 40px;
+            border-radius: 15px 15px 0 0;
+            margin: -50px -50px 30px -50px;
+            color: white;
+            font-size: 30px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .slide-header.blue { background: #003366; }
+        .slide-header.yellow { background: #FF6600; }
+        .slide-header.green { background: #003366; }
+        .slide-header.orange { background: #FF6600; }
+        .slide-header.purple { background: #003366; }
+        .slide-header.gradient { background: #FF6600; }
+
+        .slide-content {
+            flex: 1;
+            padding: 10px 0;
+            line-height: 1.5;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .slide-content h1 {
+            font-size: 42px;
+            color: #003366;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .slide-content h2 {
+            font-size: 30px;
+            color: #003366;
+            margin: 15px 0 12px 0;
+            font-weight: 600;
+        }
+
+        .slide-content h3 {
+            font-size: 22px;
+            color: #003366;
+            margin: 15px 0 10px 0;
+            font-weight: 600;
+        }
+
+        .slide-content p {
+            font-size: 18px;
+            color: #333;
+            margin: 12px 0;
+        }
+
+        .slide-content ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 10px 0;
+        }
+
+        .slide-content li {
+            font-size: 17px;
+            color: #333;
+            margin: 6px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .slide-content li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #FF6600;
+            font-weight: bold;
+        }
+
+        .slide-content li strong {
+            color: #003366;
+            font-weight: 600;
+        }
+
+        .slide-content .highlight {
+            background: #FF6600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .metric-card {
+            background: #FF6600;
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .metric-card h3 {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .metric-card .value {
+            font-size: 36px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .metric-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid #FF6600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-item .label {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+
+        .metric-item .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .metric-item .change {
+            font-size: 16px;
+            color: #FF6600;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .architecture-flow {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 15px 0;
+        }
+
+        .flow-item {
+            background: #003366;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            min-width: 220px;
+            text-align: center;
+        }
+
+        .flow-arrow {
+            font-size: 24px;
+            color: #FF6600;
+            font-weight: bold;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #FF6600;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #003366;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #FF6600;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-btn:active {
+            transform: translateY(0);
+        }
+
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #003366;
+            border: 2px solid #FF6600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            z-index: 1001;
+        }
+        
+        .progress-bar-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: #FF6600;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+
+        .quote {
+            font-style: italic;
+            font-size: 20px;
+            color: #555;
+            border-left: 4px solid #FF6600;
+            padding-left: 20px;
+            margin: 15px 0;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                width: 95%;
+                padding: 30px;
+                height: 90vh;
+            }
+
+            .slide-header {
+                font-size: 24px;
+                padding: 20px;
+                margin: -30px -30px 20px -30px;
+            }
+
+            .slide-content h1 {
+                font-size: 32px;
+            }
+
+            .slide-content h2 {
+                font-size: 24px;
+            }
+
+            .slide-content li,
+            .slide-content p {
+                font-size: 16px;
+            }
+
+            .navigation {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div class="progress-bar">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+    </div>
+    <div class="slide-counter" id="slideCounter">1 / 8</div>
+
+    <div class="presentation-container">
+        <!-- Slide 1: Capa -->
+        <div class="slide active">
+            <div class="slide-header gradient">
+                Case – Nova Consulta de Operações
+            </div>
+            <div class="slide-content" style="justify-content: center; text-align: center;">
+                <h1 style="color: #003366; margin-bottom: 20px;">100% AWS</h1>
+                <h2 style="color: #555; font-weight: 300; margin-bottom: 30px; font-size: 28px;">
+                    Modernização completa com foco em FinOps e performance
+                </h2>
+                <div style="margin-top: 40px;">
+                    <p style="font-size: 16px; color: #7f8c8d;">
+                        Use as setas do teclado ou os botões abaixo para navegar
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Situação -->
+        <div class="slide">
+            <div class="slide-header blue">🟦 S – Situação</div>
+            <div class="slide-content">
+                <h2>O Problema</h2>
+                <ul>
+                    <li>Consulta de operações rodando em <strong>mainframe</strong></li>
+                    <li><strong>Alto custo de MIPS</strong> (~R$ 9MM/ano)</li>
+                    <li><strong>Latência elevada</strong>, indisponibilidades e erros</li>
+                </ul>
+                
+                <h3 style="margin-top: 25px;">Impacto direto:</h3>
+                <ul>
+                    <li>Alertas noturnos</li>
+                    <li>Experiência ruim dos clientes</li>
+                    <li>Perda de credibilidade da plataforma</li>
+                </ul>
+
+                <h3 style="margin-top: 25px;">OKRs anuais:</h3>
+                <ul>
+                    <li><strong>FinOps:</strong> reduzir custos com mainframe em 10%</li>
+                    <li><strong>Modernização:</strong> evoluir a custódia de ativos</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 3: Desafio -->
+        <div class="slide">
+            <div class="slide-header yellow">🟨 T – Tarefa / Desafio</div>
+            <div class="slide-content">
+                <h2>Objetivo</h2>
+                <p style="font-size: 24px; margin-bottom: 30px;">
+                    Criar uma solução <strong>100% em AWS</strong>
+                </p>
+                
+                <ul>
+                    <li><strong>Segura, sustentável e performática</strong></li>
+                    <li><strong>Com dados íntegros</strong> e atualizados</li>
+                    <li>Substituir o mainframe sem perda de informação</li>
+                    <li>Reduzir drasticamente os <strong>custos com MIPS</strong></li>
+                </ul>
+
+                <h3 style="margin-top: 25px;">Requisitos não funcionais:</h3>
+                <div class="metric-grid">
+                    <div class="metric-item">
+                        <div class="label">Latência P95</div>
+                        <div class="value">≤ 130ms</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="label">TPS</div>
+                        <div class="value">≥ 1000</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="label">Volume Diário</div>
+                        <div class="value">+70MM</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Solução -->
+        <div class="slide">
+            <div class="slide-header green">🟩 A – Ação / Solução</div>
+            <div class="slide-content">
+                <h2>Implementação</h2>
+                
+                <h3>Diagnóstico e Planejamento</h3>
+                <ul>
+                    <li>Diagnóstico dos <strong>gaps técnicos e operacionais</strong></li>
+                    <li>Alinhamento com <strong>AWS, arquitetura e parceiros</strong></li>
+                    <li>Criação de <strong>POCs e testes de performance</strong></li>
+                </ul>
+
+                <h3 style="margin-top: 25px;">Pipeline de Dados</h3>
+                <div class="architecture-flow">
+                    <div class="flow-item">Mainframe</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-item">S3 (via Connect)</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-item">Glue (Processamento)</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-item">DynamoDB (Base Materializada)</div>
+                    <div class="flow-arrow">→</div>
+                    <div class="flow-item">ECS (Orquestrador com Auto Scaling)</div>
+                </div>
+
+                <p style="margin-top: 15px; text-align: center; color: #7f8c8d; font-size: 16px;">
+                    <strong>CDC:</strong> DB2 → Kafka → DynamoDB (atualização near real time)
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 5: Resultados -->
+        <div class="slide">
+            <div class="slide-header orange">🟧 R – Resultados</div>
+            <div class="slide-content">
+                <h2>Principais Conquistas</h2>
+                
+                <div class="metric-grid">
+                    <div class="metric-card">
+                        <h3>💰 Custo</h3>
+                        <div class="value">-90%</div>
+                        <p>Redução nos custos de mainframe</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>⚡ Performance</h3>
+                        <div class="value">&lt; 60ms</div>
+                        <p>Latência P95 (antes 600ms)</p>
+                    </div>
+                </div>
+
+                <div class="metric-grid">
+                    <div class="metric-item">
+                        <div class="label">📈 Volume Diário</div>
+                        <div class="value">+70 milhões</div>
+                        <div class="change">chamadas/dia com estabilidade total</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="label">✅ Confiabilidade</div>
+                        <div class="value">Zero</div>
+                        <div class="change">erros de infraestrutura (5xx)</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="label">💬 Experiência</div>
+                        <div class="value">Melhorada</div>
+                        <div class="change">confiança dos clientes</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="label">🏆 OKRs</div>
+                        <div class="value">Atingidos</div>
+                        <div class="change">FinOps e Modernização</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Métricas Comparativas -->
+        <div class="slide">
+            <div class="slide-header blue">Métricas Comparativas</div>
+            <div class="slide-content">
+                <h2>Antes vs. Depois</h2>
+                
+                <div class="metric-grid">
+                    <div class="metric-item">
+                        <div class="label">Custo Anual</div>
+                        <div class="value">R$ 9M → R$ 900K</div>
+                        <div class="change">-90%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="label">Latência P95</div>
+                        <div class="value">&gt;600ms → &lt;60ms</div>
+                        <div class="change">-90%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="label">Volume Diário</div>
+                        <div class="value">8M → 70M+</div>
+                        <div class="change">+775%</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="label">Disponibilidade</div>
+                        <div class="value">Zero incidentes</div>
+                        <div class="change">100% confiável</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; padding: 20px; background: #ecf0f1; border-radius: 15px;">
+                    <h3 style="color: #FF6600; margin-bottom: 12px;">✅ Resultados Alcançados</h3>
+                    <ul>
+                        <li>Redução de 90% nos custos operacionais</li>
+                        <li>Melhoria de 90% na latência</li>
+                        <li>Aumento de 775% na capacidade</li>
+                        <li>Zero incidentes críticos</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Aprendizados -->
+        <div class="slide">
+            <div class="slide-header purple">🟪 L – Aprendizados</div>
+            <div class="slide-content">
+                <h2>Lições Aprendidas</h2>
+                
+                <div class="quote" style="margin: 40px 0;">
+                    Modernizar é <strong>muito mais que migrar tecnologia</strong>
+                </div>
+
+                <p style="font-size: 22px; margin: 30px 0;">
+                    <strong>Redesenho da jornada</strong> e foco em valor real
+                </p>
+
+                <h3 style="margin-top: 30px;">Referência interna em:</h3>
+                <div class="metric-grid">
+                    <div class="metric-item">
+                        <div class="label">CDC</div>
+                        <div class="value">Change Data Capture</div>
+                        <div class="change">Atualização near real time</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="label">DynamoDB</div>
+                        <div class="value">Uso Eficiente</div>
+                        <div class="change">Gestão de hot partitions, RCU/WCU</div>
+                    </div>
+                    <div class="metric-item">
+                        <div class="label">Arquitetura</div>
+                        <div class="value">Serverless</div>
+                        <div class="change">Escalável e sustentável</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Conclusão -->
+        <div class="slide">
+            <div class="slide-header gradient">
+                Conclusão
+            </div>
+            <div class="slide-content" style="justify-content: center; text-align: center;">
+                <h1 style="font-size: 48px; color: #003366; margin-bottom: 30px;">
+                    Projeto de Referência
+                </h1>
+                <p style="font-size: 24px; color: #555; margin: 15px 0;">
+                    Modernização completa e sustentável
+                </p>
+                <p style="font-size: 24px; color: #555; margin: 15px 0;">
+                    Foco em valor e experiência do cliente
+                </p>
+                <div style="margin-top: 40px;">
+                    <h2 style="color: #FF6600; font-size: 36px;">
+                        Obrigado!
+                    </h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" onclick="previousSlide()">← Anterior</button>
+        <button class="nav-btn" onclick="nextSlide()">Próximo →</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            if (n >= totalSlides) {
+                currentSlide = 0;
+            } else if (n < 0) {
+                currentSlide = totalSlides - 1;
+            } else {
+                currentSlide = n;
+            }
+
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+
+            updateProgress();
+            updateCounter();
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function previousSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        function updateProgress() {
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progressBarFill').style.width = progress + '%';
+        }
+
+        function updateCounter() {
+            document.getElementById('slideCounter').textContent = `${currentSlide + 1} / ${totalSlides}`;
+        }
+
+        // Navegação por teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                previousSlide();
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                showSlide(0);
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                showSlide(totalSlides - 1);
+            }
+        });
+
+        // Inicialização
+        updateProgress();
+        updateCounter();
+
+        // Touch gestures para mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                nextSlide();
+            }
+            if (touchEndX > touchStartX + 50) {
+                previousSlide();
+            }
+        }
+    </script>
+</body>
+</html>
+
