@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Case – Consulta de Operações TO BE | Especialista de Software</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf0 100%);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            display: none;
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 51, 102, 0.15), 0 0 0 2px rgba(255, 102, 0, 0.1);
+            padding: 50px;
+            position: relative;
+            animation: slideIn 0.5s ease-out;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .slide-header {
+            padding: 25px 40px;
+            border-radius: 15px 15px 0 0;
+            margin: -50px -50px 30px -50px;
+            color: white;
+            font-size: 30px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .slide-header.blue { background: #003366; }
+        .slide-header.yellow { background: #FF6600; }
+        .slide-header.green { background: #003366; }
+        .slide-header.orange { background: #FF6600; }
+        .slide-header.purple { background: #003366; }
+        .slide-header.gradient { background: #003366; }
+        .slide-header.intro { background: #003366; }
+
+        .slide-content {
+            flex: 1;
+            padding: 10px 0;
+            line-height: 1.6;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .slide-content h1 {
+            font-size: 42px;
+            color: #003366;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .slide-content h2 {
+            font-size: 30px;
+            color: #003366;
+            margin: 20px 0 15px 0;
+            font-weight: 600;
+        }
+
+        .slide-content h3 {
+            font-size: 22px;
+            color: #003366;
+            margin: 15px 0 10px 0;
+            font-weight: 600;
+        }
+
+        .slide-content p {
+            font-size: 18px;
+            color: #333;
+            margin: 12px 0;
+        }
+
+        .slide-content ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 10px 0;
+        }
+
+        .slide-content li {
+            font-size: 17px;
+            color: #333;
+            margin: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .slide-content li:before {
+            content: "→";
+            position: absolute;
+            left: 0;
+            color: #FF6600;
+            font-weight: bold;
+        }
+
+        .slide-content li strong {
+            color: #003366;
+            font-weight: 600;
+        }
+
+        .slide-content .highlight {
+            background: #FF6600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            color: white;
+        }
+
+        .metric-card {
+            background: #FF6600;
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 15px 0;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .metric-card h3 {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .metric-card .value {
+            font-size: 36px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .metric-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .metric-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid #FF6600;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-item .label {
+            font-size: 16px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
+        }
+
+        .metric-item .value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .metric-item .change {
+            font-size: 16px;
+            color: #FF6600;
+            font-weight: 600;
+            margin-top: 5px;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #003366;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #003366;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #FF6600;
+            color: white;
+            border-color: #FF6600;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 102, 0, 0.3);
+        }
+
+        .nav-btn:active {
+            transform: translateY(0);
+        }
+
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #003366;
+            border: 2px solid #003366;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 51, 102, 0.2);
+            z-index: 1001;
+        }
+        
+        .progress-bar-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: #FF6600;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .quote {
+            font-style: italic;
+            font-size: 22px;
+            color: #555;
+            border-left: 4px solid #FF6600;
+            padding-left: 20px;
+            margin: 20px 0;
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .quote strong {
+            color: #003366;
+            font-weight: 700;
+        }
+
+        .intro-box {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            border-left: 5px solid #FF6600;
+            margin: 15px 0;
+        }
+
+        .intro-box h3 {
+            color: #003366;
+            margin-bottom: 15px;
+        }
+
+        .conflict-box {
+            background: #fff3cd;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 5px solid #FF6600;
+            margin: 15px 0;
+        }
+
+        .conflict-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                width: 95%;
+                padding: 30px;
+                height: 90vh;
+            }
+
+            .slide-header {
+                font-size: 24px;
+                padding: 20px;
+                margin: -30px -30px 20px -30px;
+            }
+
+            .slide-content h1 {
+                font-size: 32px;
+            }
+
+            .slide-content h2 {
+                font-size: 24px;
+            }
+
+            .slide-content li,
+            .slide-content p {
+                font-size: 16px;
+            }
+
+            .navigation {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+    </div>
+    <div class="slide-counter" id="slideCounter">1 / 10</div>
+
+    <div class="presentation-container">
+        <!-- Slide 1: Apresentação Pessoal -->
+        <div class="slide active">
+            <div class="slide-header gradient">
+                Apresentação
+            </div>
+            <div class="slide-content" style="justify-content: center;">
+                <h1 style="text-align: center; color: #003366; margin-bottom: 30px;">
+                    Olá! Meu nome é João Pedro
+                </h1>
+                <div class="intro-box">
+                    <h3>📊 Minha Trajetória</h3>
+                    <ul>
+                        <li>Estou no <strong>Itaú Unibanco há aproximadamente 4 anos</strong></li>
+                        <li>Estou no <strong>mercado de tecnologia há 10 anos</strong></li>
+                    </ul>
+                </div>
+                <div class="intro-box" style="margin-top: 20px;">
+                    <h3>🎯 Por que este Case?</h3>
+                    <p style="font-size: 18px; color: #333; margin-top: 10px;">
+                        Escolhi apresentar este case pois ele evidencia um cenário no qual precisei resolver tanto <strong>problemas complexos</strong> quanto na <strong>entrega de resultados estratégicos</strong>.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Introdução -->
+        <div class="slide">
+            <div class="slide-header intro">
+                Introdução
+            </div>
+            <div class="slide-content">
+                <h2>Case: Consulta de Operações TO BE da Custódia de Ativos</h2>
+                
+                <p style="font-size: 20px; margin: 20px 0;">
+                    Hoje estou aqui para apresentar um Case que tivemos na <strong>squad de Consulta de Operações</strong>.
+                </p>
+
+                <h3>O que é a Consulta de Operações?</h3>
+                <div class="intro-box">
+                    <p style="font-size: 18px; margin-bottom: 15px;">
+                        A consulta é um <strong>produto de plataforma</strong> que tem como objetivo <strong>centralizar informações importantes</strong> de uma determinada operação de crédito.
+                    </p>
+                    
+                    <h3 style="margin-top: 20px; margin-bottom: 10px;">Quais informações são essas?</h3>
+                    <ul>
+                        <li>Data de contratação da operação</li>
+                        <li>Data de vencimento da parcela</li>
+                        <li>Método de cobrança da operação</li>
+                        <li>Taxas de Juros</li>
+                        <li>Etc.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Situação / Problema -->
+        <div class="slide">
+            <div class="slide-header blue">🟦 Situação / Problema</div>
+            <div class="slide-content">
+                <h2>O Cenário Anterior</h2>
+                
+                <ul>
+                    <li>As informações das operações de crédito estavam <strong>distribuídas em um único local</strong>, trazendo disfunção e complexidade para o crescimento e ambições da comunidade de custódias</li>
+                    <li>Existia muita <strong>invasão de responsabilidade entre domínios de negócio</strong></li>
+                    <li><strong>Aumento de complexidade</strong> e alinhamento com produtos que não faziam parte do domínio (<strong>Forte acoplamento</strong>)</li>
+                </ul>
+
+                <div class="conflict-box" style="margin-top: 25px;">
+                    <h3>⚠️ Impactos Negativos</h3>
+                    <ul>
+                        <li>Dificuldade de evolução e crescimento</li>
+                        <li>Complexidade desnecessária</li>
+                        <li>Acoplamento forte entre domínios</li>
+                        <li>Falta de clareza de responsabilidades</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Tarefa / Desafio -->
+        <div class="slide">
+            <div class="slide-header yellow">🟨 Tarefa / Desafio</div>
+            <div class="slide-content">
+                <h2 style="margin-bottom: 15px;">O Desafio</h2>
+                
+                <p style="font-size: 18px; margin-bottom: 15px;">
+                    Criar uma <strong>solução centralizada</strong> que escutasse todos os domínios e agregasse a complexidade da custódia.
+                </p>
+
+                <h3 style="margin-top: 15px; margin-bottom: 10px;">Objetivos:</h3>
+                <ul style="margin-bottom: 15px;">
+                    <li>Solução <strong>disponível, escalável e sustentável</strong></li>
+                    <li><strong>Baixo acoplamento</strong> entre domínios</li>
+                </ul>
+
+                <div class="metric-grid" style="margin-top: 15px; grid-template-columns: repeat(2, 1fr); gap: 15px;">
+                    <div class="metric-card" style="padding: 20px;">
+                        <h3 style="font-size: 22px; margin-bottom: 10px;">💰 OKR FinOps</h3>
+                        <div class="value" style="font-size: 28px;">Redução de Custos</div>
+                        <p style="margin-top: 8px; font-size: 15px;">
+                            Solução <strong>barata e eficiente</strong>, alinhada com os objetivos da comunidade
+                        </p>
+                    </div>
+                    <div class="metric-card" style="padding: 20px;">
+                        <h3 style="font-size: 22px; margin-bottom: 10px;">🔄 OKR Modernização</h3>
+                        <div class="value" style="font-size: 28px;">Eliminar Mainframe</div>
+                        <p style="margin-top: 8px; font-size: 15px;">
+                            Solução <strong>performática</strong> e <strong>100% na cloud, alinhado com os objetivos da diretoria e superintendência</strong>
+                        </p>
+                    </div>
+                </div>
+
+                <p style="margin-top: 15px; font-size: 16px; text-align: center; color: #555;">
+                    <strong>100% alinhada com os OKRs e objetivos estratégicos da comunidade</strong>
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 5: Ação - Parte 1 -->
+        <div class="slide">
+            <div class="slide-header green">🟩 Ação - Planejamento e Alinhamento</div>
+            <div class="slide-content">
+                <h2 style="margin-bottom: 15px;">Atuação Tática e Estratégica</h2>
+                
+                <h3 style="margin-top: 15px; margin-bottom: 10px;">1. Pesquisa e Alinhamentos</h3>
+                <ul style="margin-bottom: 15px;">
+                    <li>Alinhamentos com <strong>produtos de plataforma</strong> e <strong>stakeholders</strong></li>
+                    <li>Identificação de <strong>riscos e complexidades</strong></li>
+                </ul>
+
+                <h3 style="margin-top: 15px; margin-bottom: 10px;">2. Tomada de Decisão Estratégica</h3>
+                <ul>
+                    <li>Reuniões com <strong>Liderança, Arquitetura e Time AWS</strong></li>
+                    <li><strong>Escolha de tecnologias</strong> alinhada com <strong>KRs de FinOps e Modernização</strong></li>
+                    <li><strong>POCs</strong> e validação com Especialista da RT</li>
+                    <li>Foco: <strong>Modernizar é impactar clientes</strong>, não apenas tecnologia</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 6: Ação - Parte 2 -->
+        <div class="slide">
+            <div class="slide-header green">🟩 Ação - Execução e Liderança</div>
+            <div class="slide-content">
+                <h2>Execução e Formação de Líderes</h2>
+                
+                <h3>3. Guiar os Team Members</h3>
+                <ul>
+                    <li>Guiar os <strong>team members para conclusão da tarefa</strong></li>
+                </ul>
+
+                <h3 style="margin-top: 25px;">4. Disseminação de Conhecimento e Responsabilidades</h3>
+                <div class="intro-box">
+                    <ul>
+                        <li><strong>Delegar</strong> - Entreguei a responsabilidade para um team member e deixei que ele tocasse o projeto</li>
+                        <li><strong>Formação de novos líderes técnicos</strong></li>
+                    </ul>
+                </div>
+
+                <h3 style="margin-top: 25px;">5. Comunicação Constante</h3>
+                <ul>
+                    <li><strong>Conversas constantes</strong> com Arquitetura e AWS</li>
+                    <li>Alinhamento contínuo de expectativas</li>
+                    <li>Transparência nas decisões técnicas</li>
+                </ul>
+
+                <div class="quote" style="margin-top: 30px;">
+                    <strong>Liderança técnica</strong> não é apenas resolver problemas, mas <strong>formar pessoas</strong> e <strong>distribuir responsabilidades</strong>.
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Resultados -->
+        <div class="slide">
+            <div class="slide-header orange">🟧 Resultados</div>
+            <div class="slide-content">
+                <h2>Principais Conquistas</h2>
+                
+                <div class="metric-grid">
+                    <div class="metric-card">
+                        <h3>💰 Redução de Custos</h3>
+                        <div class="value">R$ 9MM/ano</div>
+                        <p>Contribuição para redução de 100% dos custos com mainframe</p>
+                        <p style="margin-top: 10px; font-size: 16px;">Contribuindo com o KR de redução de custos</p>
+                    </div>
+                    <div class="metric-card">
+                        <h3>🔄 Modernização e Sustentabilidade</h3>
+                        <div class="value">100% Cloud</div>
+                        <p>Solução <strong>sustentável e escalável</strong>, 100% alinhada com o futuro da comunidade</p>
+                        <p style="margin-top: 10px; font-size: 16px;">Viabilizando o crescimento e expansão da custódia</p>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 25px;">Alinhamento Estratégico:</h3>
+                <ul>
+                    <li><strong>Produto 100% alinhado</strong> com o futuro da custódia e objetivos da comunidade</li>
+                    <li>Contribuição para <strong>expansão da custódia como produto</strong> (Visioning), alinhado com a estratégia da superintendência</li>
+                    <li>Solução <strong>sustentável</strong> que viabiliza o crescimento contínuo</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide 8: Dificuldades e Conflitos -->
+        <div class="slide">
+            <div class="slide-header purple">🟪 Dificuldades e Pontos de Conflito</div>
+            <div class="slide-content">
+                <h2>Desafios Enfrentados</h2>
+                
+                <h3>Oportunidade Identificada Durante a Construção</h3>
+                <div class="conflict-box">
+                    <p style="font-size: 18px; margin-bottom: 15px;">
+                        Durante o voo da construção da solução, foi identificado uma <strong>oportunidade em deixar a solução mais barata</strong>:
+                    </p>
+                    <ul>
+                        <li><strong>Remover o uso de OpenSearch</strong> e usarmos o <strong>DynamoDB como base materializada final</strong></li>
+                    </ul>
+                </div>
+
+                <h3 style="margin-top: 25px;">Conversas Difíceis</h3>
+                <ul>
+                    <li>Conversas difíceis com <strong>time da AWS</strong> que já estavam contando com a rampagem do uso do OpenSearch</li>
+                    <li>Precisei <strong>defender meu ponto de vista</strong> e precisei usar <strong>argumentos baseados em dados</strong> para influenciar o time da AWS + Arquitetura</li>
+                    <li>Alinhamento com <strong>liderança da custódia</strong> (Arquitetos, Especs) e defesa do quanto seria vantajoso o uso do DynamoDB para o futuro do produto da consulta</li>
+                </ul>
+
+                <div class="intro-box" style="margin-top: 25px;">
+                    <h3>💡 Abordagem Utilizada</h3>
+                    <p style="font-size: 18px; margin-top: 10px;">
+                        Mantive uma <strong>postura analítica e transparente</strong>, levando <strong>dados de custo e performance</strong> para embasar a decisão. Essa abordagem ajudou a <strong>engajar o time AWS</strong> e <strong>transformar resistência em alinhamento</strong>.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Frase que Marcou -->
+        <div class="slide">
+            <div class="slide-header gradient">
+                Frase que me Marcou
+            </div>
+            <div class="slide-content" style="justify-content: center; align-items: center;">
+                <div class="quote" style="font-size: 32px; text-align: center; padding: 40px; max-width: 900px; margin: 0 auto;">
+                    <strong style="color: #003366; font-size: 36px;">
+                        Atuei para transformar divergências em alinhamento
+                    </strong>
+                </div>
+                
+                <div style="margin-top: 40px; text-align: center;">
+                    <p style="font-size: 20px; color: #555;">
+                        Esta frase resume minha abordagem ao lidar com conflitos e desafios técnicos:
+                    </p>
+                    <ul style="margin-top: 20px; text-align: left; max-width: 700px; margin-left: auto; margin-right: auto;">
+                        <li>Postura analítica e transparente</li>
+                        <li>Argumentação baseada em dados</li>
+                        <li>Engajamento através de evidências</li>
+                        <li>Transformação de resistência em colaboração</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Conclusão -->
+        <div class="slide">
+            <div class="slide-header gradient">
+                Conclusão
+            </div>
+            <div class="slide-content" style="justify-content: center; text-align: center;">
+                <h1 style="font-size: 48px; color: #003366; margin-bottom: 30px;">
+                    Obrigado!
+                </h1>
+                <div style="margin-top: 40px;">
+                    <p style="font-size: 24px; color: #555; margin: 20px 0;">
+                        <strong>João Pedro</strong>
+                    </p>
+                    <p style="font-size: 20px; color: #7f8c8d; margin-top: 30px;">
+                        Case: Consulta de Operações TO BE da Custódia de Ativos
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" onclick="previousSlide()">← Anterior</button>
+        <button class="nav-btn" onclick="nextSlide()">Próximo →</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            if (n >= totalSlides) {
+                currentSlide = 0;
+            } else if (n < 0) {
+                currentSlide = totalSlides - 1;
+            } else {
+                currentSlide = n;
+            }
+
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+
+            updateProgress();
+            updateCounter();
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function previousSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        function updateProgress() {
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progressBarFill').style.width = progress + '%';
+        }
+
+        function updateCounter() {
+            document.getElementById('slideCounter').textContent = `${currentSlide + 1} / ${totalSlides}`;
+        }
+
+        // Navegação por teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                previousSlide();
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                showSlide(0);
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                showSlide(totalSlides - 1);
+            }
+        });
+
+        // Inicialização
+        updateProgress();
+        updateCounter();
+
+        // Touch gestures para mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                nextSlide();
+            }
+            if (touchEndX > touchStartX + 50) {
+                previousSlide();
+            }
+        }
+    </script>
+</body>
+</html>
