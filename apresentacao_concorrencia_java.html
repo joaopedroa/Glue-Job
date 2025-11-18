@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Concorrência em Ambientes Java</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #4facfe 0%, #ff6b35 100%);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            display: none;
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            position: relative;
+            animation: slideIn 0.5s ease-out;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .slide-header {
+            padding: 18px 40px;
+            border-radius: 15px 15px 0 0;
+            margin: -40px -40px 15px -40px;
+            color: white;
+            font-size: 26px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, #4facfe 0%, #ff6b35 100%);
+        }
+
+        .slide-header.blue { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .slide-header.green { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .slide-header.orange { background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%); }
+        .slide-header.purple { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .slide-header.red { background: linear-gradient(135deg, #4facfe 0%, #ff6b35 100%); }
+
+        .slide-content {
+            flex: 1;
+            padding: 5px 0;
+            line-height: 1.5;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .slide-content h1 {
+            font-size: 38px;
+            color: #ff6b35;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .slide-content h2 {
+            font-size: 26px;
+            color: #ff6b35;
+            margin: 15px 0 10px 0;
+            font-weight: 600;
+            border-bottom: 3px solid #ff6b35;
+            padding-bottom: 6px;
+        }
+
+        .slide-content h3 {
+            font-size: 20px;
+            color: #4facfe;
+            margin: 12px 0 8px 0;
+            font-weight: 600;
+        }
+
+        .slide-content p {
+            font-size: 17px;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        .slide-content ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 10px 0;
+        }
+
+        .slide-content li {
+            font-size: 16px;
+            color: #333;
+            margin: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .slide-content li:before {
+            content: "🔹";
+            position: absolute;
+            left: 0;
+            font-size: 20px;
+        }
+
+        .slide-content li strong {
+            color: #ff6b35;
+            font-weight: 600;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #4facfe15 0%, #ff6b3515 100%);
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 5px solid #ff6b35;
+            margin: 15px 0;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.1);
+        }
+
+        .highlight-box h3 {
+            color: #ff6b35;
+            margin-top: 0;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 5px solid #2196f3;
+            margin: 15px 0;
+        }
+
+        .info-box h3 {
+            color: #1976d2;
+            margin-top: 0;
+        }
+
+        .warning-box {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 5px solid #ff9800;
+            margin: 15px 0;
+        }
+
+        .warning-box h3 {
+            color: #f57c00;
+            margin-top: 0;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 12px 0;
+            overflow-x: auto;
+            border-left: 4px solid #ff6b35;
+        }
+
+        .code-block code {
+            color: #f8f8f2;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .component-card {
+            background: linear-gradient(135deg, #4facfe15 0%, #ff6b3515 100%);
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #ff6b35;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
+        }
+
+        .component-card h4 {
+            color: #ff6b35;
+            font-size: 18px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .component-card p {
+            font-size: 15px;
+            color: #555;
+            margin: 0;
+        }
+
+        .flow-diagram {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 12px;
+            margin: 12px 0;
+            border: 2px dashed #ff6b35;
+        }
+
+        .flow-step {
+            background: white;
+            padding: 10px;
+            margin: 6px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ff6b35;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            font-size: 14px;
+        }
+
+        .flow-step strong {
+            color: #ff6b35;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            font-size: 15px;
+        }
+
+        .comparison-table th {
+            background: #ff6b35;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .comparison-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #ff6b35;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #ff6b35;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #ff6b35;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .nav-btn:active {
+            transform: translateY(0);
+        }
+
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #ff6b35;
+            border: 2px solid #ff6b35;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 107, 53, 0.2);
+            z-index: 1001;
+        }
+        
+        .progress-bar-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #ff6b35 100%);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .quote {
+            font-style: italic;
+            font-size: 18px;
+            color: #555;
+            border-left: 4px solid #ff6b35;
+            padding: 15px;
+            margin: 15px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .quote strong {
+            color: #ff6b35;
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                width: 95%;
+                padding: 30px;
+                height: 90vh;
+            }
+
+            .slide-header {
+                font-size: 24px;
+                padding: 20px;
+                margin: -30px -30px 20px -30px;
+            }
+
+            .slide-content h1 {
+                font-size: 32px;
+            }
+
+            .slide-content h2 {
+                font-size: 24px;
+            }
+
+            .slide-content li,
+            .slide-content p {
+                font-size: 16px;
+            }
+
+            .navigation {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .component-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+    </div>
+    <div class="slide-counter" id="slideCounter">1 / 13</div>
+
+    <div class="presentation-container">
+        <!-- Slide 1: Título -->
+        <div class="slide active">
+            <div class="slide-header red">
+                Concorrência em Java
+            </div>
+            <div class="slide-content" style="justify-content: center; text-align: center;">
+                <h1 style="font-size: 56px; margin-bottom: 30px; color: #ff6b35;">
+                    Concorrência em Ambientes Java
+                </h1>
+                <p style="font-size: 28px; color: #666; margin-top: 20px;">
+                    Mutex, Monitores e Sincronização
+                </p>
+                <div style="margin-top: 50px;">
+                    <p style="font-size: 20px; color: #999;">
+                        Apresentação para Gestão
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: O que é um Mutex? -->
+        <div class="slide">
+            <div class="slide-header blue">
+                O que é um Mutex?
+            </div>
+            <div class="slide-content">
+                <h2>Conceito Fundamental</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 18px; margin: 0;">
+                        <strong>Mutex</strong> é um mecanismo de <strong>exclusão mútua</strong> usado para garantir que 
+                        <strong>apenas uma thread por vez</strong> execute um trecho crítico de código ou acesse um recurso compartilhado.
+                    </p>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 20px;">
+                    <h3>🎯 Objetivo</h3>
+                    <p style="font-size: 16px; margin: 8px 0;">
+                        Prevenir <strong>race conditions</strong> e garantir a <strong>consistência</strong> dos dados compartilhados entre threads.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Principais Mutex em Java -->
+        <div class="slide">
+            <div class="slide-header green">
+                Principais Mutex em Java
+            </div>
+            <div class="slide-content">
+                <h2>Mecanismos de Sincronização</h2>
+                
+                <div class="component-grid" style="grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 12px 0;">
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>synchronized</h4>
+                        <p style="font-size: 14px;">Mutex básico e mais comum em Java</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>ReentrantLock</h4>
+                        <p style="font-size: 14px;">Mutex profissional com recursos avançados</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>Semaphore(1)</h4>
+                        <p style="font-size: 14px;">Semáforo binário (permite 1 thread)</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>StampedLock</h4>
+                        <p style="font-size: 14px;">Lock otimizado para leitura/escrita</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: ReentrantLock -->
+        <div class="slide">
+            <div class="slide-header purple">
+                ReentrantLock - O Mutex Profissional
+            </div>
+            <div class="slide-content">
+                <h2>Por que é considerado profissional?</h2>
+                
+                <div class="highlight-box" style="margin: 12px 0;">
+                    <h3>🔑 Vantagens sobre synchronized</h3>
+                    <ul style="margin: 8px 0;">
+                        <li style="font-size: 15px; margin: 5px 0;"><strong>Lock não bloqueantes:</strong> tryLock() permite tentar adquirir o lock sem bloquear</li>
+                        <li style="font-size: 15px; margin: 5px 0;"><strong>Timeout:</strong> tryLock(timeout) permite esperar por um tempo limitado</li>
+                        <li style="font-size: 15px; margin: 5px 0;"><strong>Mais controle:</strong> Permite implementar lógicas de lock mais complexas</li>
+                    </ul>
+                </div>
+
+                <div class="code-block" style="margin-top: 15px; font-size: 12px;">
+<code>ReentrantLock lock = new ReentrantLock();
+
+// Lock não bloqueante
+if (lock.tryLock()) {
+    try {
+        // código crítico
+    } finally {
+        lock.unlock();
+    }
+}
+
+// Lock com timeout
+if (lock.tryLock(5, TimeUnit.SECONDS)) {
+    try {
+        // código crítico
+    } finally {
+        lock.unlock();
+    }
+}</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: O que é um Monitor? -->
+        <div class="slide">
+            <div class="slide-header orange">
+                O que é um Monitor?
+            </div>
+            <div class="slide-content">
+                <h2>Conceito de Sincronização</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 18px; margin: 0;">
+                        Um <strong>monitor</strong> é um conceito de sincronização que combina:
+                    </p>
+                </div>
+
+                <div class="component-grid" style="grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 15px 0;">
+                    <div class="component-card" style="padding: 15px;">
+                        <h4>🔒 Mutex (Lock)</h4>
+                        <p style="font-size: 15px; margin-top: 8px;">Para <strong>exclusão mútua</strong></p>
+                        <p style="font-size: 14px; margin-top: 5px; color: #666;">Garante que apenas uma thread acesse o recurso</p>
+                    </div>
+                    <div class="component-card" style="padding: 15px;">
+                        <h4>⏰ Variáveis de Condição</h4>
+                        <p style="font-size: 15px; margin-top: 8px;">Para <strong>coordenação</strong> (wait/notify)</p>
+                        <p style="font-size: 14px; margin-top: 5px; color: #666;">Permite threads esperarem por condições</p>
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 15px;">
+                    <p style="font-size: 16px; margin: 0;">
+                        <strong>Em Java:</strong> Todo objeto possui um monitor. O <strong>synchronized</strong> usa o monitor do objeto como mutex.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Mutex vs Monitor -->
+        <div class="slide">
+            <div class="slide-header green">
+                Mutex vs Monitor
+            </div>
+            <div class="slide-content">
+                <h2>Diferenças Fundamentais</h2>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Mutex</th>
+                            <th>Monitor</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Mecanismo de <strong>exclusão mútua</strong></td>
+                            <td>Estrutura que combina <strong>mutex + variáveis de condição</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Apenas controla acesso ao recurso</td>
+                            <td>Controla acesso + coordena threads (wait/notify)</td>
+                        </tr>
+                        <tr>
+                            <td>Exemplos: ReentrantLock, Semaphore</td>
+                            <td>Todo objeto em Java possui um monitor</td>
+                        </tr>
+                        <tr>
+                            <td>Mais simples</td>
+                            <td>Mais completo (inclui mutex)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="highlight-box" style="margin-top: 15px; padding: 12px;">
+                    <p style="font-size: 15px; margin: 0;">
+                        <strong>synchronized</strong> usa o monitor do objeto como mutex para exclusão mútua.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Race Condition -->
+        <div class="slide">
+            <div class="slide-header red">
+                Race Condition
+            </div>
+            <div class="slide-content">
+                <h2>O que é Race Condition?</h2>
+                
+                <div class="warning-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        Acontece quando um processo <strong>depende da ordem de suas execuções</strong> e quando isso não acontece, 
+                        acaba causando <strong>resultados inesperados</strong>.
+                    </p>
+                </div>
+
+                <h3 style="margin: 15px 0 10px 0;">Como solucionar?</h3>
+                <div class="component-grid" style="grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 12px 0;">
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>Mutex</h4>
+                        <p style="font-size: 14px;">synchronized, ReentrantLock</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>Atomic</h4>
+                        <p style="font-size: 14px;">AtomicInteger, AtomicReference</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>Estruturas Concorrentes</h4>
+                        <p style="font-size: 14px;">ConcurrentHashMap, BlockingQueue</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: AtomicInteger -->
+        <div class="slide">
+            <div class="slide-header blue">
+                AtomicInteger
+            </div>
+            <div class="slide-content">
+                <h2>Operações Atômicas</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        <strong>AtomicInteger</strong> utiliza instruções atômicas de CPU (<strong>CAS - Compare and Swap</strong>) 
+                        para garantir operações thread-safe sem necessidade de locks.
+                    </p>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 15px;">
+                    <h3>⚡ Vantagens</h3>
+                    <ul style="margin: 8px 0;">
+                        <li style="font-size: 15px; margin: 5px 0;"><strong>Performance:</strong> Mais rápido que synchronized para operações simples</li>
+                        <li style="font-size: 15px; margin: 5px 0;"><strong>Sem bloqueio:</strong> Não causa bloqueio de threads</li>
+                        <li style="font-size: 15px; margin: 5px 0;"><strong>Lock-free:</strong> Implementação sem locks explícitos</li>
+                    </ul>
+                </div>
+
+                <div class="code-block" style="margin-top: 15px; font-size: 12px;">
+<code>AtomicInteger counter = new AtomicInteger(0);
+
+// Operações atômicas
+counter.incrementAndGet();  // Thread-safe
+counter.addAndGet(10);      // Thread-safe
+int value = counter.get();  // Thread-safe</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Quando synchronized não atende? -->
+        <div class="slide">
+            <div class="slide-header purple">
+                Quando synchronized não atende?
+            </div>
+            <div class="slide-content">
+                <h2>Limitações do synchronized</h2>
+                
+                <div class="component-grid" style="grid-template-columns: 1fr; gap: 12px; margin: 12px 0;">
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🌐 Ambientes Distribuídos</h4>
+                        <p style="font-size: 14px; margin-top: 8px;">Mutex local não vai atender. Precisa usar soluções apropriadas:</p>
+                        <ul style="margin-top: 8px; padding-left: 20px;">
+                            <li style="font-size: 13px; margin: 3px 0;">Redis Redlock</li>
+                            <li style="font-size: 13px; margin: 3px 0;">Zookeeper</li>
+                            <li style="font-size: 13px; margin: 3px 0;">DynamoDB Conditional Writes (Bloqueio Otimista)</li>
+                        </ul>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>⚡ Locks Granulares</h4>
+                        <p style="font-size: 14px; margin-top: 8px;">Locks muito granulares podem causar <strong>perda de performance</strong>.</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🔒 Deadlocks Não Planejados</h4>
+                        <p style="font-size: 14px; margin-top: 8px;">synchronized pode levar a <strong>deadlocks</strong> difíceis de detectar e resolver.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Deadlock -->
+        <div class="slide">
+            <div class="slide-header red">
+                Deadlock
+            </div>
+            <div class="slide-content">
+                <h2>O que é Deadlock?</h2>
+                
+                <div class="warning-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        Acontece quando há <strong>dependências circulares</strong> entre recursos. Uma thread espera a outra liberar 
+                        um recurso que <strong>nunca será liberado</strong>.
+                    </p>
+                </div>
+
+                <h3 style="margin: 15px 0 10px 0;">Condições de Coffman</h3>
+                <p style="font-size: 15px; margin: 8px 0;">
+                    Para que ocorra um deadlock, <strong>quatro condições</strong> devem ser atendidas simultaneamente:
+                </p>
+                <ul style="margin: 8px 0;">
+                    <li style="font-size: 15px; margin: 5px 0;"><strong>Exclusão mútua:</strong> Recursos não podem ser compartilhados</li>
+                    <li style="font-size: 15px; margin: 5px 0;"><strong>Espera e retenção:</strong> Thread mantém recurso enquanto espera outro</li>
+                    <li style="font-size: 15px; margin: 5px 0;"><strong>Ausência de preempção:</strong> Recursos não podem ser forçados a liberar</li>
+                    <li style="font-size: 15px; margin: 5px 0;"><strong>Espera circular:</strong> Cadeia circular de dependências</li>
+                </ul>
+
+                <div class="highlight-box" style="margin-top: 15px; padding: 12px;">
+                    <h3 style="font-size: 18px; margin-bottom: 8px;">✅ Como evitar?</h3>
+                    <p style="font-size: 15px; margin: 0;">
+                        <strong>Timeout ao adquirir lock:</strong> Use <code>tryLock(timeout)</code> do ReentrantLock para evitar espera indefinida.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Reentrant no Monitor -->
+        <div class="slide">
+            <div class="slide-header orange">
+                Reentrant no Monitor
+            </div>
+            <div class="slide-content">
+                <h2>O que significa Reentrant?</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        <strong>Reentrante</strong> significa que uma thread que já possui o monitor lock pode entrar novamente 
+                        num bloco <strong>synchronized</strong> sem deadlock.
+                    </p>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 15px;">
+                    <h3>🔑 Como funciona?</h3>
+                    <p style="font-size: 16px; margin: 8px 0;">
+                        O monitor mantém um <strong>contador interno de reentrância</strong>. Cada vez que a thread adquire o lock, 
+                        o contador aumenta. Quando libera, diminui. Só libera o recurso quando o contador chega a zero.
+                    </p>
+                </div>
+
+                <div class="code-block" style="margin-top: 15px; font-size: 12px;">
+<code>public class Example {
+    public synchronized void method1() {
+        method2(); // OK - mesma thread, reentrante
+    }
+    
+    public synchronized void method2() {
+        // Código executado sem deadlock
+    }
+}</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Monitor é um Mutex? -->
+        <div class="slide">
+            <div class="slide-header green">
+                Monitor é um Mutex?
+            </div>
+            <div class="slide-content">
+                <h2>Relação entre Monitor e Mutex</h2>
+                
+                <div class="quote" style="font-size: 17px; padding: 18px;">
+                    <p style="margin: 0;">
+                        <strong>"Monitor é uma abstração que inclui um mutex, mas vai além:</strong> ele também gerencia as 
+                        filas de espera e os sinais entre threads, usando wait/notify. O mutex é só um dos elementos de um monitor."
+                    </p>
+                </div>
+
+                <div class="component-grid" style="grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px;">
+                    <div class="component-card" style="padding: 15px;">
+                        <h4>Mutex</h4>
+                        <p style="font-size: 15px; margin-top: 8px;">Apenas <strong>exclusão mútua</strong></p>
+                        <p style="font-size: 14px; margin-top: 5px; color: #666;">Controla acesso ao recurso</p>
+                    </div>
+                    <div class="component-card" style="padding: 15px;">
+                        <h4>Monitor</h4>
+                        <p style="font-size: 15px; margin-top: 8px;"><strong>Mutex + Coordenação</strong></p>
+                        <p style="font-size: 14px; margin-top: 5px; color: #666;">Inclui mutex + wait/notify + filas de espera</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Objetos Imutáveis -->
+        <div class="slide">
+            <div class="slide-header blue">
+                Por que Objetos Imutáveis evitam Locks?
+            </div>
+            <div class="slide-content">
+                <h2>Imutabilidade e Concorrência</h2>
+                
+                <div class="quote" style="font-size: 17px; padding: 18px;">
+                    <p style="margin: 0;">
+                        <strong>"Locks só são necessários quando várias threads podem modificar o mesmo estado.</strong>
+                        Objetos imutáveis não têm estado mutável compartilhado, então não existe risco de condições de corrida. 
+                        Como nada é escrito, ninguém precisa ser bloqueado."
+                    </p>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 20px;">
+                    <h3>✅ Vantagens dos Objetos Imutáveis</h3>
+                    <ul style="margin: 10px 0;">
+                        <li style="font-size: 15px; margin: 6px 0;"><strong>Thread-safe por natureza:</strong> Não precisam de sincronização</li>
+                        <li style="font-size: 15px; margin: 6px 0;"><strong>Sem race conditions:</strong> Estado não pode ser modificado</li>
+                        <li style="font-size: 15px; margin: 6px 0;"><strong>Performance:</strong> Sem overhead de locks</li>
+                        <li style="font-size: 15px; margin: 6px 0;"><strong>Simplicidade:</strong> Código mais fácil de entender e manter</li>
+                    </ul>
+                </div>
+
+                <div class="code-block" style="margin-top: 15px; font-size: 12px;">
+<code>// Objeto imutável - thread-safe sem locks
+public final class ImmutableValue {
+    private final int value;
+    
+    public ImmutableValue(int value) {
+        this.value = value;
+    }
+    
+    public int getValue() {
+        return value; // Seguro para múltiplas threads
+    }
+}</code>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Conclusão -->
+        <div class="slide">
+            <div class="slide-header red">
+                Conclusão
+            </div>
+            <div class="slide-content" style="justify-content: center; text-align: center;">
+                <h1 style="font-size: 48px; color: #ff6b35; margin-bottom: 25px;">
+                    Obrigado!
+                </h1>
+                
+                <div class="highlight-box" style="max-width: 800px; margin: 0 auto; padding: 15px;">
+                    <h2 style="border: none; margin-bottom: 12px; font-size: 24px;">Principais Pontos</h2>
+                    <ul style="text-align: left; font-size: 16px; margin: 10px 0;">
+                        <li style="margin: 6px 0;"><strong>Mutex</strong> garante exclusão mútua</li>
+                        <li style="margin: 6px 0;"><strong>Monitor</strong> = Mutex + variáveis de condição</li>
+                        <li style="margin: 6px 0;"><strong>ReentrantLock</strong> oferece mais controle que synchronized</li>
+                        <li style="margin: 6px 0;"><strong>AtomicInteger</strong> usa CAS para operações lock-free</li>
+                        <li style="margin: 6px 0;"><strong>Objetos imutáveis</strong> evitam a necessidade de locks</li>
+                    </ul>
+                </div>
+
+                <div style="margin-top: 25px;">
+                    <p style="font-size: 20px; color: #666;">
+                        Concorrência em Ambientes Java
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" onclick="previousSlide()">← Anterior</button>
+        <button class="nav-btn" onclick="nextSlide()">Próximo →</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            if (n >= totalSlides) {
+                currentSlide = 0;
+            } else if (n < 0) {
+                currentSlide = totalSlides - 1;
+            } else {
+                currentSlide = n;
+            }
+
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+
+            updateProgress();
+            updateCounter();
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function previousSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        function updateProgress() {
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progressBarFill').style.width = progress + '%';
+        }
+
+        function updateCounter() {
+            document.getElementById('slideCounter').textContent = `${currentSlide + 1} / ${totalSlides}`;
+        }
+
+        // Navegação por teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                previousSlide();
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                showSlide(0);
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                showSlide(totalSlides - 1);
+            }
+        });
+
+        // Inicialização
+        updateProgress();
+        updateCounter();
+
+        // Touch gestures para mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                nextSlide();
+            }
+            if (touchEndX > touchStartX + 50) {
+                previousSlide();
+            }
+        }
+    </script>
+</body>
+</html>
