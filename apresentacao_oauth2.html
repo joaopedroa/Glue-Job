@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Autenticação e Autorização com OAuth 2.0</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            display: none;
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            position: relative;
+            animation: slideIn 0.5s ease-out;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .slide-header {
+            padding: 18px 40px;
+            border-radius: 15px 15px 0 0;
+            margin: -40px -40px 15px -40px;
+            color: white;
+            font-size: 26px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .slide-header.blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .slide-header.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .slide-header.orange { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .slide-header.purple { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .slide-header.red { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+
+        .slide-content {
+            flex: 1;
+            padding: 5px 0;
+            line-height: 1.5;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .slide-content h1 {
+            font-size: 38px;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .slide-content h2 {
+            font-size: 26px;
+            color: #667eea;
+            margin: 15px 0 10px 0;
+            font-weight: 600;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 6px;
+        }
+
+        .slide-content h3 {
+            font-size: 20px;
+            color: #764ba2;
+            margin: 12px 0 8px 0;
+            font-weight: 600;
+        }
+
+        .slide-content p {
+            font-size: 17px;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        .slide-content ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 10px 0;
+        }
+
+        .slide-content li {
+            font-size: 16px;
+            color: #333;
+            margin: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .slide-content li:before {
+            content: "🔹";
+            position: absolute;
+            left: 0;
+            font-size: 20px;
+        }
+
+        .slide-content li strong {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 5px solid #667eea;
+            margin: 15px 0;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .highlight-box h3 {
+            color: #667eea;
+            margin-top: 0;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 5px solid #2196f3;
+            margin: 15px 0;
+        }
+
+        .info-box h3 {
+            color: #1976d2;
+            margin-top: 0;
+        }
+
+        .warning-box {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 5px solid #ff9800;
+            margin: 15px 0;
+        }
+
+        .warning-box h3 {
+            color: #f57c00;
+            margin-top: 0;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 12px 0;
+            overflow-x: auto;
+            border-left: 4px solid #667eea;
+        }
+
+        .code-block code {
+            color: #f8f8f2;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .component-card {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .component-card h4 {
+            color: #667eea;
+            font-size: 18px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .component-card p {
+            font-size: 15px;
+            color: #555;
+            margin: 0;
+        }
+
+        .flow-diagram {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 12px;
+            margin: 12px 0;
+            border: 2px dashed #667eea;
+        }
+
+        .flow-step {
+            background: white;
+            padding: 10px;
+            margin: 6px 0;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            font-size: 14px;
+        }
+
+        .flow-step strong {
+            color: #667eea;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            font-size: 15px;
+        }
+
+        .comparison-table th {
+            background: #667eea;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .comparison-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #667eea;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #667eea;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-btn:active {
+            transform: translateY(0);
+        }
+
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #667eea;
+            border: 2px solid #667eea;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(102, 126, 234, 0.2);
+            z-index: 1001;
+        }
+        
+        .progress-bar-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .quote {
+            font-style: italic;
+            font-size: 18px;
+            color: #555;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin: 15px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .quote strong {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                width: 95%;
+                padding: 30px;
+                height: 90vh;
+            }
+
+            .slide-header {
+                font-size: 24px;
+                padding: 20px;
+                margin: -30px -30px 20px -30px;
+            }
+
+            .slide-content h1 {
+                font-size: 32px;
+            }
+
+            .slide-content h2 {
+                font-size: 24px;
+            }
+
+            .slide-content li,
+            .slide-content p {
+                font-size: 16px;
+            }
+
+            .navigation {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .component-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+    </div>
+    <div class="slide-counter" id="slideCounter">1 / 15</div>
+
+    <div class="presentation-container">
+        <!-- Slide 1: Título -->
+        <div class="slide active">
+            <div class="slide-header blue">
+                Autenticação e Autorização
+            </div>
+            <div class="slide-content" style="justify-content: center; text-align: center;">
+                <h1 style="font-size: 56px; margin-bottom: 30px;">
+                    OAuth 2.0
+                </h1>
+                <p style="font-size: 28px; color: #666; margin-top: 20px;">
+                    Protocolo de Delegação de Autorização
+                </p>
+                <div style="margin-top: 50px;">
+                    <p style="font-size: 20px; color: #999;">
+                        Apresentação para Gestão
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: O que é OAuth 2.0? -->
+        <div class="slide">
+            <div class="slide-header blue">
+                O que é OAuth 2.0?
+            </div>
+            <div class="slide-content">
+                <h2>Conceitos Fundamentais</h2>
+                
+                <div class="warning-box">
+                    <h3>⚠️ OAuth 2.0 NÃO é Login (Autenticação)</h3>
+                    <p>OAuth 2.0 é um <strong>protocolo/framework de delegação de autorização</strong></p>
+                </div>
+
+                <h3>Objetivos do OAuth 2.0:</h3>
+                <ul>
+                    <li>Dar à aplicação do cliente um <strong>access_token</strong></li>
+                    <li>Permitir que um sistema acesse recursos em nome de um usuário</li>
+                    <li>Controlar permissões via <strong>scope</strong></li>
+                </ul>
+
+                <div class="highlight-box" style="margin-top: 15px; padding: 12px;">
+                    <p style="font-size: 17px; font-weight: 600; color: #667eea; margin: 0;">
+                        <strong>Em resumo:</strong> OAuth 2.0 apenas dá <strong>permissão</strong> para que um cliente acesse um recurso, 
+                        <strong>não faz autenticação (login)</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Componentes do OAuth 2.0 -->
+        <div class="slide">
+            <div class="slide-header green">
+                Componentes do OAuth 2.0
+            </div>
+            <div class="slide-content">
+                <h2>Arquitetura do Protocolo</h2>
+                
+                <div class="component-grid">
+                    <div class="component-card">
+                        <h4>👤 Resource Owner</h4>
+                        <p>O usuário dono dos dados</p>
+                    </div>
+                    <div class="component-card">
+                        <h4>💻 Client</h4>
+                        <p>A aplicação que quer acessar os dados do usuário</p>
+                    </div>
+                    <div class="component-card">
+                        <h4>🔐 Authorization Server</h4>
+                        <p>Onde o usuário faz o login (Keycloak, Cognito, Auth0, Okta, etc)</p>
+                    </div>
+                    <div class="component-card">
+                        <h4>🌐 Resource Server</h4>
+                        <p>API que consome o token</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Curiosidade - JWT vs Token Opaco -->
+        <div class="slide">
+            <div class="slide-header purple">
+                💡 Curiosidade: JWT vs Token Opaco
+            </div>
+            <div class="slide-content">
+                <h2>Validação de Tokens</h2>
+                
+                <div class="info-box">
+                    <h3>🔑 Token JWT</h3>
+                    <ul>
+                        <li>A aplicação <strong>não precisa</strong> ir até o Authorization Server para validar</li>
+                        <li>Valida <strong>localmente</strong> pois o token foi assinado com chave privada</li>
+                        <li>A API tem acesso à chave pública (JWKS)</li>
+                        <li><strong>Não precisa</strong> ir novamente ao IDP</li>
+                    </ul>
+                </div>
+
+                <div class="warning-box">
+                    <h3>🔒 Token Opaco</h3>
+                    <ul>
+                        <li>É necessário ir ao IDP para validar o token</li>
+                        <li>Chama a API <strong>/introspect</strong></li>
+                        <li>Retorna se o token está ativo ou não</li>
+                        <li>Requer comunicação com o servidor de autorização</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: OAuth 1.0 vs OAuth 2.0 -->
+        <div class="slide">
+            <div class="slide-header orange">
+                OAuth 1.0 vs OAuth 2.0
+            </div>
+            <div class="slide-content">
+                <h2>Principais Diferenças</h2>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>OAuth 1.0</th>
+                            <th>OAuth 2.0</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Segurança baseada em <strong>assinatura criptográfica</strong></td>
+                            <td>Segurança baseada em <strong>tokens + HTTPS</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Complexo de implementar</td>
+                            <td>Simples, baseado em chamadas HTTP</td>
+                        </tr>
+                        <tr>
+                            <td>Assinatura em autorização e autenticação</td>
+                            <td>Troca de tokens via HTTP</td>
+                        </tr>
+                        <tr>
+                            <td>Segurança na camada de aplicação</td>
+                            <td>Segurança na camada de transporte (TLS)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="highlight-box" style="margin-top: 25px;">
+                    <h3>📈 Evolução</h3>
+                    <p>Com a evolução da internet, o Auth precisava de muito mais do que autenticação e autorização para navegadores. 
+                    A mudança mais radical foi <strong>delegar a segurança criptográfica para protocolos HTTP/TLS</strong>.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: OIDC -->
+        <div class="slide">
+            <div class="slide-header purple">
+                OIDC (OpenID Connect)
+            </div>
+            <div class="slide-content">
+                <h2>Extensão do OAuth 2.0</h2>
+                
+                <div class="info-box">
+                    <h3>O que é OIDC?</h3>
+                    <p style="font-size: 20px; margin: 15px 0;">
+                        OIDC é uma <strong>extensão do OAuth 2.0</strong> para realizar <strong>autenticação (login)</strong>
+                    </p>
+                </div>
+
+                <h3>Principais Características:</h3>
+                <ul>
+                    <li>Adiciona ao token JWT o <strong>ID Token</strong> com informações do usuário</li>
+                    <li>Apenas com OAuth 2.0 você <strong>não sabe quem é o usuário</strong></li>
+                    <li>Com OIDC você <strong>passa a saber</strong> quem é o usuário</li>
+                </ul>
+
+                <div class="highlight-box" style="margin-top: 25px;">
+                    <p style="font-size: 18px;">
+                        <strong>OAuth 2.0:</strong> Autorização (permissão de acesso)<br>
+                        <strong>OIDC:</strong> Autenticação (identificação do usuário)
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: IDP -->
+        <div class="slide">
+            <div class="slide-header green">
+                IDP (Identity Provider)
+            </div>
+            <div class="slide-content">
+                <h2>O que é um IDP?</h2>
+                
+                <div class="info-box">
+                    <p style="font-size: 20px; margin: 15px 0;">
+                        É um <strong>serviço que autentica usuário e emite tokens</strong>
+                    </p>
+                </div>
+
+                <h3>Exemplos de IDPs:</h3>
+                <div class="component-grid" style="grid-template-columns: repeat(3, 1fr);">
+                    <div class="component-card">
+                        <h4>Keycloak</h4>
+                    </div>
+                    <div class="component-card">
+                        <h4>AWS Cognito</h4>
+                    </div>
+                    <div class="component-card">
+                        <h4>Okta</h4>
+                    </div>
+                </div>
+
+                <h3 style="margin-top: 18px;">Responsabilidades do IDP:</h3>
+                <ul>
+                    <li>Validar e armazenar usuários</li>
+                    <li>Fazer login</li>
+                    <li>Emitir token JWT</li>
+                    <li>MFA (Multi-Factor Authentication)</li>
+                    <li>Administrar groups, roles, etc</li>
+                </ul>
+
+                <div class="highlight-box" style="margin-top: 15px;">
+                    <p><strong>Em resumo:</strong> IDP é o local que faz autenticações e armazenamento de tokens</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Conexão OAuth 2.0 + OIDC + IDP -->
+        <div class="slide">
+            <div class="slide-header blue">
+                Como se Conectam?
+            </div>
+            <div class="slide-content">
+                <h2>OAuth 2.0 + OIDC + IDP</h2>
+                
+                <div class="flow-diagram" style="text-align: center; padding: 25px;">
+                    <div style="font-size: 22px; color: #667eea; font-weight: 600; margin-bottom: 20px;">
+                        IDP é o sistema que implementa OAuth 2.0 + OIDC
+                    </div>
+                    
+                    <div class="component-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 20px;">
+                        <div class="component-card">
+                            <h4>OAuth 2.0</h4>
+                            <p>Protocolo de Autorização</p>
+                        </div>
+                        <div class="component-card" style="border-color: #764ba2;">
+                            <h4 style="color: #764ba2;">+</h4>
+                        </div>
+                        <div class="component-card">
+                            <h4>OIDC</h4>
+                            <p>Extensão para Autenticação</p>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-top: 25px; font-size: 28px; color: #667eea;">↓</div>
+                    
+                    <div class="component-card" style="margin-top: 15px; max-width: 400px; margin-left: auto; margin-right: auto;">
+                        <h4>IDP</h4>
+                        <p>Implementa ambos os protocolos</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Authorization Code Flow -->
+        <div class="slide">
+            <div class="slide-header green">
+                Fluxo: Authorization Code (com PKCE)
+            </div>
+            <div class="slide-content">
+                <h2>O Fluxo Mais Recomendado</h2>
+                
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <strong>1.</strong> Usuário acessa a aplicação (Web ou Mobile)
+                    </div>
+                    <div class="flow-step">
+                        <strong>2.</strong> Aplicação redireciona para o IDP (Cognito ou Keycloak)
+                    </div>
+                    <div class="flow-step">
+                        <strong>3.</strong> Usuário faz login
+                    </div>
+                    <div class="flow-step">
+                        <strong>4.</strong> IDP retorna um <strong>authorization code</strong> (duração curta)
+                    </div>
+                    <div class="flow-step">
+                        <strong>5.</strong> Authorization code é trocado por <strong>access_token JWT</strong>
+                    </div>
+                </div>
+
+                <div class="info-box" style="margin-top: 15px;">
+                    <p><strong>grant_type:</strong> authorization_code</p>
+                    <p><strong>client_secret:</strong> garante que apenas o cliente legítimo possa trocar o authorization code</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: PKCE -->
+        <div class="slide">
+            <div class="slide-header purple">
+                PKCE - Proteção do Authorization Code
+            </div>
+            <div class="slide-content">
+                <h2>O que é PKCE?</h2>
+                
+                <div class="info-box" style="padding: 12px; margin: 12px 0;">
+                    <p style="font-size: 16px; margin: 0;">
+                        <strong>PKCE</strong> é uma extensão do OAuth 2.0 para manter o authorization code seguro
+                    </p>
+                </div>
+
+                <h3 style="margin: 12px 0 8px 0;">Por que é necessário?</h3>
+                <ul style="margin: 8px 0;">
+                    <li style="font-size: 15px; margin: 6px 0;">Muito usado em aplicações públicas (web, mobile) que <strong>não conseguem manter client_secret protegido</strong></li>
+                    <li style="font-size: 15px; margin: 6px 0;">Se um hacker interceptar o authorization code, poderia facilmente trocá-lo por um token</li>
+                    <li style="font-size: 15px; margin: 6px 0;">O PKCE nasceu para resolver esse problema</li>
+                </ul>
+
+                <h3 style="margin: 15px 0 10px 0;">Como funciona?</h3>
+                <div class="component-grid" style="grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 10px 0;">
+                    <div class="component-card" style="padding: 12px;">
+                        <h4 style="font-size: 18px; margin-bottom: 8px;">Code Verifier</h4>
+                        <ul style="padding-left: 20px; margin: 0;">
+                            <li style="font-size: 14px; margin: 4px 0;">String aleatória e segura</li>
+                            <li style="font-size: 14px; margin: 4px 0;">Criada pelo client</li>
+                            <li style="font-size: 14px; margin: 4px 0;">Fica apenas no client</li>
+                        </ul>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4 style="font-size: 18px; margin-bottom: 8px;">Code Challenge</h4>
+                        <ul style="padding-left: 20px; margin: 0;">
+                            <li style="font-size: 14px; margin: 4px 0;">Versão hash do code verifier (SHA256)</li>
+                            <li style="font-size: 14px; margin: 4px 0;">Enviada para o servidor de autorização</li>
+                            <li style="font-size: 14px; margin: 4px 0;">O code verifier é enviado quando quer pegar access_token</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Fluxo PKCE Detalhado -->
+        <div class="slide">
+            <div class="slide-header purple">
+                Fluxo PKCE - Passo a Passo
+            </div>
+            <div class="slide-content">
+                <h2>Como o PKCE Entra no Fluxo</h2>
+                
+                <div class="flow-diagram" style="padding: 12px; margin: 10px 0;">
+                    <div class="flow-step" style="padding: 10px; margin: 6px 0; font-size: 14px;">
+                        <strong>1.</strong> Cliente calcula code verifier e hash (code challenge)
+                    </div>
+                    <div class="flow-step" style="padding: 10px; margin: 6px 0; font-size: 14px;">
+                        <strong>2.</strong> Envia: 
+                        <div class="code-block" style="margin-top: 6px; font-size: 10px; padding: 8px;">
+GET /authorization?code_challenge=abc123&code_challenge_method=S256
+                        </div>
+                    </div>
+                    <div class="flow-step" style="padding: 10px; margin: 6px 0; font-size: 14px;">
+                        <strong>3.</strong> Servidor devolve authorization code
+                    </div>
+                    <div class="flow-step" style="padding: 10px; margin: 6px 0; font-size: 14px;">
+                        <strong>4.</strong> Cliente troca code + code_verifier por token:
+                        <div class="code-block" style="margin-top: 6px; font-size: 10px; padding: 8px;">
+POST /token { grant_type, code, code_verifier }
+                        </div>
+                    </div>
+                    <div class="flow-step" style="padding: 10px; margin: 6px 0; font-size: 14px;">
+                        <strong>5.</strong> IDP verifica se code_verifier (SHA256) = code_challenge
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 10px; padding: 12px;">
+                    <h3 style="font-size: 18px; margin-bottom: 6px;">🔒 Segurança</h3>
+                    <p style="font-size: 14px; margin: 0;">Se um hacker interceptar o authorization code, ele <strong>não conseguirá fazer nada</strong>, 
+                    pois também precisa do code verifier!</p>
+                </div>
+
+                <div class="info-box" style="margin-top: 10px; padding: 10px;">
+                    <p style="font-size: 14px; margin: 0;"><strong>IMPORTANTE:</strong> Padrão mais recomendado para OIDC + OAuth 2.0</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Client Credentials -->
+        <div class="slide">
+            <div class="slide-header orange">
+                Fluxo: Client Credentials
+            </div>
+            <div class="slide-content">
+                <h2 style="margin-bottom: 8px;">Fluxo Entre Sistemas</h2>
+                
+                <div class="info-box" style="padding: 10px; margin: 8px 0;">
+                    <p style="font-size: 16px; margin: 0;">
+                        <strong>grant_type:</strong> client_credentials
+                    </p>
+                </div>
+
+                <h3 style="margin: 10px 0 6px 0; font-size: 19px;">Características:</h3>
+                <ul style="margin: 6px 0;">
+                    <li style="font-size: 14px; margin: 3px 0;">Utilizado para <strong>fluxo entre sistemas</strong></li>
+                    <li style="font-size: 14px; margin: 3px 0;"><strong>Não envolve o usuário</strong></li>
+                    <li style="font-size: 14px; margin: 3px 0;">Exemplo: <strong>microservice chamando outro microservice</strong></li>
+                </ul>
+
+                <div class="flow-diagram" style="margin-top: 10px; padding: 10px;">
+                    <div class="flow-step" style="padding: 8px; margin: 4px 0; font-size: 13px;">
+                        <strong>1.</strong> Cliente informa <strong>client_id</strong> e <strong>client_secret</strong>
+                    </div>
+                    <div class="flow-step" style="padding: 8px; margin: 4px 0; font-size: 13px;">
+                        <strong>2.</strong> IDP emite um <strong>access_token</strong>
+                    </div>
+                    <div class="flow-step" style="padding: 8px; margin: 4px 0; font-size: 13px;">
+                        <strong>3.</strong> API valida o token e libera acesso se válido
+                    </div>
+                </div>
+
+                <div class="component-grid" style="grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px;">
+                    <div class="component-card" style="padding: 10px;">
+                        <h4 style="font-size: 16px; margin-bottom: 6px;">Quando usar?</h4>
+                        <p style="font-size: 13px; margin: 0;">Chamada de microservice para microservice (backend to backend)</p>
+                    </div>
+                    <div class="component-card" style="padding: 10px;">
+                        <h4 style="font-size: 16px; margin-bottom: 6px;">Segurança</h4>
+                        <p style="font-size: 13px; margin: 0;">Alta, porém precisa guardar o client_secret com segurança</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Implicit Flow e Device Authorization -->
+        <div class="slide">
+            <div class="slide-header red">
+                Outros Fluxos
+            </div>
+            <div class="slide-content">
+                <h2>Implicit Flow</h2>
+                
+                <div class="warning-box">
+                    <h3>⚠️ Totalmente Depreciado e em Desuso</h3>
+                    <ul>
+                        <li>Chama apenas o <strong>/authorize</strong> e não precisa chamar o <strong>/token</strong></li>
+                        <li>Não precisa do grant_type pois já retorna o token quando chama o /authorize</li>
+                        <li>Quando chama /authorize para pegar id_token, você já pega o access_token também e <strong>expõe na URL</strong></li>
+                    </ul>
+                </div>
+
+                <h2 style="margin-top: 30px;">Device Authorization</h2>
+                
+                <div class="info-box">
+                    <h3>Quando usar?</h3>
+                    <ul>
+                        <li>Muito utilizado quando <strong>não possui navegador</strong></li>
+                        <li>Exemplo: <strong>Smart TV</strong></li>
+                        <li>Aplicação faz <strong>polling</strong> ao IDP até ter a confirmação de login</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Scopes vs Roles -->
+        <div class="slide">
+            <div class="slide-header green">
+                Scopes vs Roles
+            </div>
+            <div class="slide-content">
+                <h2>Qual a Diferença?</h2>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Scopes</th>
+                            <th>Roles</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Nível de acesso que uma <strong>aplicação</strong> tem sobre um recurso</td>
+                            <td>Nível de acesso que um <strong>usuário</strong> tem dentro da aplicação</td>
+                        </tr>
+                        <tr>
+                            <td>Usado para limitar o acesso da aplicação aos endpoints</td>
+                            <td>Usado para controle de acesso a nível de usuário</td>
+                        </tr>
+                        <tr>
+                            <td>Relacionado ao que a aplicação pode fazer</td>
+                            <td>Relacionado a quem o usuário é dentro do sistema (Perfil do Usuário)</td>
+                        </tr>
+                        <tr>
+                            <td>Exemplo: read, write, admin</td>
+                            <td>Exemplo: ADMIN, USER, GERENTE_OPERACOES, ANALISTA_CREDITO</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="highlight-box" style="margin-top: 25px;">
+                    <h3>📝 Resumo</h3>
+                    <p><strong>Scopes:</strong> O que a aplicação pode fazer (permissões da aplicação)</p>
+                    <p><strong>Roles:</strong> Quem o usuário é (perfil/permissões do usuário)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 15: JWT -->
+        <div class="slide">
+            <div class="slide-header blue">
+                JWT (JSON Web Token)
+            </div>
+            <div class="slide-content">
+                <h2>Características do JWT</h2>
+                
+                <div class="warning-box" style="padding: 12px; margin: 10px 0;">
+                    <h3 style="font-size: 19px; margin-bottom: 8px;">⚠️ Importante: JWT não é Criptografado</h3>
+                    <p style="font-size: 17px; margin: 0;">
+                        O JWT <strong>não é criptografado</strong>, mas sim <strong>assinado</strong>
+                    </p>
+                </div>
+
+                <h3 style="margin: 12px 0 8px 0;">O que isso significa?</h3>
+                <ul style="margin: 8px 0;">
+                    <li style="font-size: 15px; margin: 5px 0;"><strong>Qualquer pessoa pode ver</strong> o conteúdo do token</li>
+                    <li style="font-size: 15px; margin: 5px 0;"><strong>Não pode alterá-lo</strong> sem invalidar a assinatura</li>
+                    <li style="font-size: 15px; margin: 5px 0;">A assinatura garante a <strong>integridade</strong> do token</li>
+                    <li style="font-size: 15px; margin: 5px 0;">Validação é feita usando a chave pública (JWKS)</li>
+                </ul>
+
+                <div class="info-box" style="margin-top: 15px; padding: 12px;">
+                    <h3 style="font-size: 19px; margin-bottom: 8px;">🔐 Estrutura do JWT</h3>
+                    <p style="font-size: 15px; margin: 8px 0;">Um JWT é composto por três partes separadas por ponto (.):</p>
+                    <ul style="margin: 8px 0;">
+                        <li style="font-size: 14px; margin: 4px 0;"><strong>Header:</strong> Tipo do token e algoritmo de assinatura</li>
+                        <li style="font-size: 14px; margin: 4px 0;"><strong>Payload:</strong> Dados (claims) do token</li>
+                        <li style="font-size: 14px; margin: 4px 0;"><strong>Signature:</strong> Assinatura que garante a integridade</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 15px; padding: 12px;">
+                    <p style="font-size: 15px; margin: 0;"><strong>Lembre-se:</strong> Nunca coloque informações sensíveis no payload do JWT, pois ele é legível por qualquer pessoa!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 16: Conclusão -->
+        <div class="slide">
+            <div class="slide-header blue">
+                Conclusão
+            </div>
+            <div class="slide-content" style="justify-content: center; text-align: center;">
+                <h1 style="font-size: 48px; color: #667eea; margin-bottom: 25px;">
+                    Obrigado!
+                </h1>
+                
+                <div class="highlight-box" style="max-width: 800px; margin: 0 auto; padding: 15px;">
+                    <h2 style="border: none; margin-bottom: 12px; font-size: 24px;">Principais Pontos</h2>
+                    <ul style="text-align: left; font-size: 16px; margin: 10px 0;">
+                        <li style="margin: 6px 0;">OAuth 2.0 é sobre <strong>autorização</strong>, não autenticação</li>
+                        <li style="margin: 6px 0;">OIDC adiciona <strong>autenticação</strong> ao OAuth 2.0</li>
+                        <li style="margin: 6px 0;">IDP implementa ambos os protocolos</li>
+                        <li style="margin: 6px 0;">Authorization Code Flow com PKCE é o <strong>mais recomendado</strong></li>
+                        <li style="margin: 6px 0;">JWT é <strong>assinado</strong>, não criptografado</li>
+                    </ul>
+                </div>
+
+                <div style="margin-top: 25px;">
+                    <p style="font-size: 20px; color: #666;">
+                        Autenticação e Autorização com OAuth 2.0
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" onclick="previousSlide()">← Anterior</button>
+        <button class="nav-btn" onclick="nextSlide()">Próximo →</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            if (n >= totalSlides) {
+                currentSlide = 0;
+            } else if (n < 0) {
+                currentSlide = totalSlides - 1;
+            } else {
+                currentSlide = n;
+            }
+
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+
+            updateProgress();
+            updateCounter();
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function previousSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        function updateProgress() {
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progressBarFill').style.width = progress + '%';
+        }
+
+        function updateCounter() {
+            document.getElementById('slideCounter').textContent = `${currentSlide + 1} / ${totalSlides}`;
+        }
+
+        // Navegação por teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                previousSlide();
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                showSlide(0);
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                showSlide(totalSlides - 1);
+            }
+        });
+
+        // Inicialização
+        updateProgress();
+        updateCounter();
+
+        // Touch gestures para mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                nextSlide();
+            }
+            if (touchEndX > touchStartX + 50) {
+                previousSlide();
+            }
+        }
+    </script>
+</body>
+</html>
