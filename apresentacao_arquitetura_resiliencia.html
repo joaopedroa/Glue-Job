@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arquitetura de Resiliência</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #4facfe 0%, #ff6b35 100%);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            display: none;
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            position: relative;
+            animation: slideIn 0.5s ease-out;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .slide-header {
+            padding: 18px 40px;
+            border-radius: 15px 15px 0 0;
+            margin: -40px -40px 15px -40px;
+            color: white;
+            font-size: 26px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, #4facfe 0%, #ff6b35 100%);
+        }
+
+        .slide-header.blue { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .slide-header.green { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .slide-header.orange { background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%); }
+        .slide-header.purple { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .slide-header.red { background: linear-gradient(135deg, #4facfe 0%, #ff6b35 100%); }
+
+        .slide-content {
+            flex: 1;
+            padding: 5px 0;
+            line-height: 1.5;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .slide-content h1 {
+            font-size: 38px;
+            color: #ff6b35;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .slide-content h2 {
+            font-size: 26px;
+            color: #ff6b35;
+            margin: 15px 0 10px 0;
+            font-weight: 600;
+            border-bottom: 3px solid #ff6b35;
+            padding-bottom: 6px;
+        }
+
+        .slide-content h3 {
+            font-size: 20px;
+            color: #4facfe;
+            margin: 12px 0 8px 0;
+            font-weight: 600;
+        }
+
+        .slide-content p {
+            font-size: 17px;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        .slide-content ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 10px 0;
+        }
+
+        .slide-content li {
+            font-size: 16px;
+            color: #333;
+            margin: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .slide-content li:before {
+            content: "🔹";
+            position: absolute;
+            left: 0;
+            font-size: 20px;
+        }
+
+        .slide-content li strong {
+            color: #ff6b35;
+            font-weight: 600;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #4facfe15 0%, #ff6b3515 100%);
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 5px solid #ff6b35;
+            margin: 15px 0;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.1);
+        }
+
+        .highlight-box h3 {
+            color: #ff6b35;
+            margin-top: 0;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 5px solid #2196f3;
+            margin: 15px 0;
+        }
+
+        .info-box h3 {
+            color: #1976d2;
+            margin-top: 0;
+        }
+
+        .warning-box {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 5px solid #ff9800;
+            margin: 15px 0;
+        }
+
+        .warning-box h3 {
+            color: #f57c00;
+            margin-top: 0;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 12px 0;
+            overflow-x: auto;
+            border-left: 4px solid #ff6b35;
+        }
+
+        .code-block code {
+            color: #f8f8f2;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .component-card {
+            background: linear-gradient(135deg, #4facfe15 0%, #ff6b3515 100%);
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #ff6b35;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
+        }
+
+        .component-card h4 {
+            color: #ff6b35;
+            font-size: 18px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .component-card p {
+            font-size: 15px;
+            color: #555;
+            margin: 0;
+        }
+
+        .flow-diagram {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 12px;
+            margin: 12px 0;
+            border: 2px dashed #ff6b35;
+        }
+
+        .flow-step {
+            background: white;
+            padding: 10px;
+            margin: 6px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ff6b35;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            font-size: 14px;
+        }
+
+        .flow-step strong {
+            color: #ff6b35;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            font-size: 15px;
+        }
+
+        .comparison-table th {
+            background: #ff6b35;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .comparison-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #ff6b35;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #ff6b35;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #ff6b35;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .nav-btn:active {
+            transform: translateY(0);
+        }
+
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #ff6b35;
+            border: 2px solid #ff6b35;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 107, 53, 0.2);
+            z-index: 1001;
+        }
+        
+        .progress-bar-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #ff6b35 100%);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .quote {
+            font-style: italic;
+            font-size: 18px;
+            color: #555;
+            border-left: 4px solid #ff6b35;
+            padding: 15px;
+            margin: 15px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .quote strong {
+            color: #ff6b35;
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                width: 95%;
+                padding: 30px;
+                height: 90vh;
+            }
+
+            .slide-header {
+                font-size: 24px;
+                padding: 20px;
+                margin: -30px -30px 20px -30px;
+            }
+
+            .slide-content h1 {
+                font-size: 32px;
+            }
+
+            .slide-content h2 {
+                font-size: 24px;
+            }
+
+            .slide-content li,
+            .slide-content p {
+                font-size: 16px;
+            }
+
+            .navigation {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .component-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+    </div>
+    <div class="slide-counter" id="slideCounter">1 / 18</div>
+
+    <div class="presentation-container">
+        <!-- Slide 1: Título -->
+        <div class="slide active">
+            <div class="slide-header red">
+                Arquitetura de Resiliência
+            </div>
+            <div class="slide-content" style="justify-content: center; text-align: center;">
+                <h1 style="font-size: 56px; margin-bottom: 30px; color: #ff6b35;">
+                    Arquitetura de Resiliência
+                </h1>
+                <p style="font-size: 28px; color: #666; margin-top: 20px;">
+                    Construindo Sistemas que Resistem a Falhas
+                </p>
+                <div style="margin-top: 50px;">
+                    <p style="font-size: 20px; color: #999;">
+                        Apresentação para Gestão
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Pilares da Resiliência -->
+        <div class="slide">
+            <div class="slide-header blue">
+                Pilares da Resiliência
+            </div>
+            <div class="slide-content">
+                <h2>O que é Resiliência?</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        <strong>Resiliência</strong> é a capacidade do sistema de <strong>continuar funcionando</strong> 
+                        mesmo diante de falhas.
+                    </p>
+                </div>
+
+                <h3 style="margin: 15px 0 10px 0;">Os 6 Pilares:</h3>
+                <div class="component-grid" style="grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 10px 0;">
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🔒 Isolamento</h4>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🔄 Redundância</h4>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🛡️ Tolerância a Falhas</h4>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🔧 Auto-recuperação</h4>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>⏸️ Backpressure</h4>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>👁️ Observabilidade</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Timeouts -->
+        <div class="slide">
+            <div class="slide-header green">
+                Timeouts
+            </div>
+            <div class="slide-content">
+                <h2>Proteção Contra Chamadas Externas</h2>
+                
+                <div class="warning-box" style="padding: 15px; margin: 12px 0;">
+                    <h3 style="font-size: 18px; margin-bottom: 8px;">⚠️ Regra Fundamental</h3>
+                    <p style="font-size: 16px; margin: 0;">
+                        <strong>Qualquer chamada externa</strong> deve possuir <strong>timeouts configurados</strong>.
+                    </p>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 15px;">
+                    <h3>💡 Por que é importante?</h3>
+                    <ul style="margin: 8px 0;">
+                        <li style="font-size: 15px; margin: 5px 0;">Sem timeout, <strong>trabamos threads</strong> e sistemas</li>
+                        <li style="font-size: 15px; margin: 5px 0;">Sistemas podem ficar <strong>indefinidamente esperando</strong> respostas</li>
+                        <li style="font-size: 15px; margin: 5px 0;">Pode causar <strong>esgotamento de recursos</strong> (threads, conexões)</li>
+                        <li style="font-size: 15px; margin: 5px 0;">Protege contra <strong>contextos externos</strong> que não controlamos</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Retry -->
+        <div class="slide">
+            <div class="slide-header orange">
+                Retry (Retentativas)
+            </div>
+            <div class="slide-content">
+                <h2>Estratégia de Retentativas</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        Retentativas são importantes, mas precisam ser <strong>inteligentes</strong>.
+                    </p>
+                </div>
+
+                <div class="component-grid" style="grid-template-columns: 1fr; gap: 10px; margin: 12px 0;">
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>✅ Quando retentar</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">Erros <strong>5xx</strong> (erros do servidor)</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>⚠️ Cuidado</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">Retentar <strong>4xx</strong> pode não fazer sentido (erro do cliente)</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>📈 Exponential Backoff</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">Aumenta o delay entre tentativas para não sobrecarregar sistema estressado</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🎲 Jitter</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">Adiciona aleatoriedade no delay para evitar que todos retentem ao mesmo tempo</p>
+                        <p style="font-size: 13px; margin-top: 5px; color: #666;">Tipos: Full, Equal, Fixed, Decorrelated</p>
+                    </div>
+                </div>
+
+                <div class="warning-box" style="margin-top: 15px; padding: 12px;">
+                    <p style="font-size: 15px; margin: 0;">
+                        <strong>ATENÇÃO:</strong> Não é boa prática realizar retentativas em fluxos <strong>não idempotentes</strong>.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Circuit Breaker -->
+        <div class="slide">
+            <div class="slide-header purple">
+                Circuit Breaker
+            </div>
+            <div class="slide-content">
+                <h2>Proteção Contra Falhas em Cascata</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        Evita que um <strong>problema temporário</strong> no sistema se arraste para o <strong>sistema inteiro</strong>.
+                    </p>
+                </div>
+
+                <div class="component-grid" style="grid-template-columns: repeat(3, 1fr); gap: 12px; margin: 12px 0;">
+                    <div class="component-card" style="padding: 12px; border-color: #4facfe;">
+                        <h4 style="color: #4facfe;">🟢 Closed</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">Tudo normal, requisições passam</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px; border-color: #ff6b35;">
+                        <h4 style="color: #ff6b35;">🔴 Open</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">Não chama mais a request, entrega 503</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px; border-color: #ff9800;">
+                        <h4 style="color: #ff9800;">🟡 Half-Open</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">Testa se estabilizou</p>
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 15px; padding: 12px;">
+                    <p style="font-size: 15px; margin: 0;">
+                        Muito usado com <strong>Resilience4J</strong> e <strong>Istio</strong>.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Bulkhead -->
+        <div class="slide">
+            <div class="slide-header blue">
+                Bulkhead
+            </div>
+            <div class="slide-content">
+                <h2>Isolamento de Recursos</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        Isola recursos para evitar que a <strong>falha de um componente</strong> possa comprometer o <strong>sistema inteiro</strong>.
+                    </p>
+                </div>
+
+                <h3 style="margin: 15px 0 10px 0;">Em software podemos separar:</h3>
+                <div class="component-grid" style="grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 10px 0;">
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🧵 Threads</h4>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🏊 Pools</h4>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>📋 Filas</h4>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🔌 Conexões</h4>
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 15px; padding: 12px;">
+                    <p style="font-size: 15px; margin: 0;">
+                        Isso faz com que um <strong>serviço lento não derrube totalmente</strong> a aplicação. 
+                        Muito importante em integrações com sistemas lentos.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Rate Limit -->
+        <div class="slide">
+            <div class="slide-header green">
+                Rate Limit
+            </div>
+            <div class="slide-content">
+                <h2>Controle de Taxa de Vazão</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        Controla <strong>taxa de vazão</strong> por segundo, minuto, etc.
+                    </p>
+                </div>
+
+                <div class="component-grid" style="grid-template-columns: 1fr; gap: 12px; margin: 12px 0;">
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🎯 Objetivo</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">Evitar bater o limite de um determinado serviço que possui <strong>quotas</strong></p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🪣 Token Bucket</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">Estratégia comum para implementar rate limiting</p>
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 15px; padding: 12px;">
+                    <p style="font-size: 15px; margin: 0;">
+                        Protege tanto o sistema próprio quanto sistemas externos contra sobrecarga.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Backpressure -->
+        <div class="slide">
+            <div class="slide-header orange">
+                Backpressure
+            </div>
+            <div class="slide-content">
+                <h2>Controle de Carga</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        Forma de controlar o <strong>produtor de eventos ou requests</strong> de enviar mais carga do que o esperado.
+                    </p>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 15px;">
+                    <h3>🛡️ Como funciona?</h3>
+                    <p style="font-size: 16px; margin: 8px 0;">
+                        O estrangulamento consegue controlar a quantidade de carga que recebe, 
+                        <strong>sinalizando que está sobrecarregado</strong> e mandando ir com mais calma.
+                    </p>
+                </div>
+
+                <h3 style="margin: 15px 0 10px 0;">Pode utilizar:</h3>
+                <div class="component-grid" style="grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 10px 0;">
+                    <div class="component-card" style="padding: 10px;">
+                        <h4 style="font-size: 16px;">Bulkhead</h4>
+                    </div>
+                    <div class="component-card" style="padding: 10px;">
+                        <h4 style="font-size: 16px;">Rate Limiter</h4>
+                    </div>
+                    <div class="component-card" style="padding: 10px;">
+                        <h4 style="font-size: 16px;">Circuit Breaker</h4>
+                    </div>
+                    <div class="component-card" style="padding: 10px;">
+                        <h4 style="font-size: 16px;">Timeout</h4>
+                    </div>
+                    <div class="component-card" style="padding: 10px;">
+                        <h4 style="font-size: 16px;">Retry com Jitter</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Load Shedding -->
+        <div class="slide">
+            <div class="slide-header purple">
+                Load Shedding
+            </div>
+            <div class="slide-content">
+                <h2>Rejeição Inteligente</h2>
+                
+                <div class="quote" style="font-size: 17px; padding: 18px;">
+                    <p style="margin: 0;">
+                        <strong>"É melhor falhar rápido do que falhar tudo."</strong>
+                    </p>
+                </div>
+
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        É o ato de <strong>rejeitar requisições propositalmente</strong> pois já está próximo de se saturar.
+                    </p>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 15px;">
+                    <h3>💡 Exemplo</h3>
+                    <p style="font-size: 16px; margin: 8px 0;">
+                        Se <strong>CPU está em 80%</strong>, então rejeita requisições para evitar saturação completa.
+                    </p>
+                </div>
+
+                <div class="component-card" style="margin-top: 15px; padding: 12px;">
+                    <h4>🎯 Estratégia</h4>
+                    <p style="font-size: 14px; margin-top: 5px;">
+                        Monitorar métricas (CPU, memória, latência) e rejeitar requisições quando próximo dos limites, 
+                        mantendo o sistema estável para requisições já em processamento.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Fallback e Idempotência -->
+        <div class="slide">
+            <div class="slide-header blue">
+                Fallback e Idempotência
+            </div>
+            <div class="slide-content">
+                <h2>Estratégias Complementares</h2>
+                
+                <div class="component-grid" style="grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 12px 0;">
+                    <div class="component-card" style="padding: 15px;">
+                        <h4>🔄 Fallback</h4>
+                        <p style="font-size: 15px; margin-top: 8px;">
+                            Retornar <strong>resposta default ou alternativa</strong> quando serviço principal falha.
+                        </p>
+                        <p style="font-size: 13px; margin-top: 8px; color: #666;">
+                            Exemplo: Cache, valor padrão, serviço secundário
+                        </p>
+                    </div>
+                    <div class="component-card" style="padding: 15px;">
+                        <h4>🔄 Idempotência</h4>
+                        <p style="font-size: 15px; margin-top: 8px;">
+                            Garantir que operações podem ser <strong>repetidas sem efeitos colaterais</strong>.
+                        </p>
+                        <p style="font-size: 13px; margin-top: 8px; color: #666;">
+                            Essencial para retry seguro
+                        </p>
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 15px; padding: 12px;">
+                    <p style="font-size: 15px; margin: 0;">
+                        <strong>Idempotência</strong> permite retentativas seguras sem duplicar efeitos indesejados.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Saga -->
+        <div class="slide">
+            <div class="slide-header green">
+                Saga
+            </div>
+            <div class="slide-content">
+                <h2>Transações em Sistemas Distribuídos</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        <strong>Saga</strong> garante transações em sistemas distribuídos através de <strong>compensação</strong>.
+                    </p>
+                </div>
+
+                <div class="flow-diagram" style="margin-top: 15px;">
+                    <div class="flow-step">
+                        <strong>1.</strong> Executa operações em múltiplos serviços
+                    </div>
+                    <div class="flow-step">
+                        <strong>2.</strong> Se alguma operação falha, executa <strong>compensações</strong>
+                    </div>
+                    <div class="flow-step">
+                        <strong>3.</strong> Desfaz tudo que foi feito por todo o sistema distribuído
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 15px; padding: 12px;">
+                    <h3>🎯 Padrões</h3>
+                    <ul style="margin: 8px 0;">
+                        <li style="font-size: 15px; margin: 5px 0;"><strong>Orquestração:</strong> Coordenador central gerencia o fluxo</li>
+                        <li style="font-size: 15px; margin: 5px 0;"><strong>Coreografia:</strong> Cada serviço sabe o que fazer após receber evento</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: Event Source + CQRS -->
+        <div class="slide">
+            <div class="slide-header orange">
+                Event Sourcing + CQRS
+            </div>
+            <div class="slide-content">
+                <h2>Padrão Arquitetural para Resiliência</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        Esse padrão arquitetural ajuda na <strong>resiliência e reprocessamento</strong> em casos de falhas.
+                    </p>
+                </div>
+
+                <div class="component-grid" style="grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 15px 0;">
+                    <div class="component-card" style="padding: 15px;">
+                        <h4>📝 Event Sourcing</h4>
+                        <p style="font-size: 14px; margin-top: 8px;">
+                            Armazena <strong>eventos</strong> ao invés de estado atual
+                        </p>
+                        <p style="font-size: 13px; margin-top: 5px; color: #666;">
+                            Permite reconstruir estado e reprocessar eventos
+                        </p>
+                    </div>
+                    <div class="component-card" style="padding: 15px;">
+                        <h4>📊 CQRS</h4>
+                        <p style="font-size: 14px; margin-top: 8px;">
+                            Separa <strong>comandos</strong> (escrita) de <strong>consultas</strong> (leitura)
+                        </p>
+                        <p style="font-size: 13px; margin-top: 5px; color: #666;">
+                            Permite otimizar cada lado independentemente
+                        </p>
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 15px; padding: 12px;">
+                    <p style="font-size: 15px; margin: 0;">
+                        Juntos, permitem <strong>reprocessar eventos</strong> em caso de falhas e manter <strong>consistência eventual</strong>.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: Arquitetura Distribuída -->
+        <div class="slide">
+            <div class="slide-header purple">
+                Arquitetura Distribuída e Resiliência
+            </div>
+            <div class="slide-content">
+                <h2>Estratégias de Distribuição</h2>
+                
+                <div class="component-grid" style="grid-template-columns: 1fr; gap: 12px; margin: 12px 0;">
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🌐 Replicação</h4>
+                        <ul style="margin-top: 8px; padding-left: 20px;">
+                            <li style="font-size: 14px; margin: 3px 0;"><strong>Multi AZ:</strong> Múltiplas zonas de disponibilidade</li>
+                            <li style="font-size: 14px; margin: 3px 0;"><strong>Multi Region:</strong> Múltiplas regiões geográficas</li>
+                        </ul>
+                        <p style="font-size: 13px; margin-top: 5px; color: #666;">Aumenta disponibilidade e tolerância a falhas</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>📨 Mensageria com DLQ</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">
+                            <strong>Dead Letter Queue</strong> para mensagens que falharam após múltiplas tentativas
+                        </p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🔄 Orquestração de Transações</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">
+                            <strong>Saga</strong> para garantir consistência em operações distribuídas
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: Estratégias de Deploy - Introdução -->
+        <div class="slide">
+            <div class="slide-header blue">
+                Estratégias de Deploy
+            </div>
+            <div class="slide-content">
+                <h2>Objetivos</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        Servem para <strong>diminuir o impacto no cliente</strong> nas novas entregas de software.
+                    </p>
+                </div>
+
+                <div class="component-grid" style="grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 12px 0;">
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>✅ Benefícios</h4>
+                        <ul style="margin-top: 8px; padding-left: 20px;">
+                            <li style="font-size: 14px; margin: 3px 0;">Evitar <strong>downtime</strong></li>
+                            <li style="font-size: 14px; margin: 3px 0;">Testar novas versões em <strong>produção com segurança</strong></li>
+                            <li style="font-size: 14px; margin: 3px 0;"><strong>Rollback rápido</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 15: Big Bang e Rolling Deploy -->
+        <div class="slide">
+            <div class="slide-header green">
+                Big Bang e Rolling Deploy
+            </div>
+            <div class="slide-content">
+                <h2>Dois Extremos</h2>
+                
+                <div class="component-grid" style="grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 12px 0;">
+                    <div class="component-card" style="padding: 12px; border-color: #ff6b35;">
+                        <h4 style="color: #ff6b35;">💥 Big Bang Deploy</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">Derruba versão atual e sobe a nova</p>
+                        <ul style="margin-top: 8px; padding-left: 20px;">
+                            <li style="font-size: 13px; margin: 2px 0;">❌ Causa <strong>downtime</strong></li>
+                            <li style="font-size: 13px; margin: 2px 0;">❌ <strong>Risco alto</strong></li>
+                        </ul>
+                    </div>
+                    <div class="component-card" style="padding: 12px; border-color: #4facfe;">
+                        <h4 style="color: #4facfe;">🔄 Rolling Deploy</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">Atualiza gradualmente (1 task → espera → outro)</p>
+                        <ul style="margin-top: 8px; padding-left: 20px;">
+                            <li style="font-size: 13px; margin: 2px 0;">✅ Sem <strong>downtime</strong></li>
+                            <li style="font-size: 13px; margin: 2px 0;">✅ <strong>Simplicidade</strong></li>
+                            <li style="font-size: 13px; margin: 2px 0;">⚠️ Bug se espalha rapidamente</li>
+                            <li style="font-size: 13px; margin: 2px 0;">⚠️ Rollback mais lento</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 16: Blue/Green Deployment -->
+        <div class="slide">
+            <div class="slide-header orange">
+                Blue/Green Deployment
+            </div>
+            <div class="slide-content">
+                <h2>Dois Ambientes Completos</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        Mantém <strong>dois ambientes completos</strong>: <strong>Blue</strong> (atual) e <strong>Green</strong> (nova versão).
+                    </p>
+                </div>
+
+                <div class="flow-diagram" style="margin-top: 15px;">
+                    <div class="flow-step">
+                        <strong>1.</strong> Deploy da nova versão no ambiente <strong>Green</strong>
+                    </div>
+                    <div class="flow-step">
+                        <strong>2.</strong> Testa o ambiente Green
+                    </div>
+                    <div class="flow-step">
+                        <strong>3.</strong> Fluxo muda do Blue para Green <strong>instantaneamente</strong>
+                    </div>
+                </div>
+
+                <div class="component-grid" style="grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 15px;">
+                    <div class="component-card" style="padding: 12px; border-color: #4facfe;">
+                        <h4 style="color: #4facfe;">✅ Vantagens</h4>
+                        <ul style="margin-top: 8px; padding-left: 20px;">
+                            <li style="font-size: 13px; margin: 2px 0;"><strong>Rollback rápido</strong> (instantâneo)</li>
+                            <li style="font-size: 13px; margin: 2px 0;"><strong>Zero downtime</strong> real</li>
+                            <li style="font-size: 13px; margin: 2px 0;">Mantém ambas versões ativas</li>
+                        </ul>
+                    </div>
+                    <div class="component-card" style="padding: 12px; border-color: #ff6b35;">
+                        <h4 style="color: #ff6b35;">⚠️ Desvantagens</h4>
+                        <ul style="margin-top: 8px; padding-left: 20px;">
+                            <li style="font-size: 13px; margin: 2px 0;"><strong>Custo</strong> de manter dois ambientes</li>
+                            <li style="font-size: 13px; margin: 2px 0;">Migrações de banco precisam ser <strong>compatíveis</strong></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 17: Canary Deployment -->
+        <div class="slide">
+            <div class="slide-header purple">
+                Canary Deployment
+            </div>
+            <div class="slide-content">
+                <h2>Deploy Gradual e Controlado</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        Envia apenas uma <strong>porcentagem das chamadas</strong> para a nova versão, 
+                        aumentando conforme sente segurança até os 100%.
+                    </p>
+                </div>
+
+                <div class="flow-diagram" style="margin-top: 15px;">
+                    <div class="flow-step">
+                        <strong>1.</strong> Deploy da nova versão para <strong>pequena porcentagem</strong> (ex: 5%)
+                    </div>
+                    <div class="flow-step">
+                        <strong>2.</strong> Monitora métricas e comportamento
+                    </div>
+                    <div class="flow-step">
+                        <strong>3.</strong> Se tudo OK, aumenta gradualmente (10% → 25% → 50% → 100%)
+                    </div>
+                </div>
+
+                <div class="component-grid" style="grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 15px;">
+                    <div class="component-card" style="padding: 12px; border-color: #4facfe;">
+                        <h4 style="color: #4facfe;">✅ Vantagens</h4>
+                        <ul style="margin-top: 8px; padding-left: 20px;">
+                            <li style="font-size: 13px; margin: 2px 0;"><strong>Menor impacto</strong> nos usuários</li>
+                            <li style="font-size: 13px; margin: 2px 0;"><strong>Rollback rápido</strong></li>
+                        </ul>
+                    </div>
+                    <div class="component-card" style="padding: 12px; border-color: #ff6b35;">
+                        <h4 style="color: #ff6b35;">⚠️ Desvantagens</h4>
+                        <ul style="margin-top: 8px; padding-left: 20px;">
+                            <li style="font-size: 13px; margin: 2px 0;">Mais <strong>complexo</strong></li>
+                            <li style="font-size: 13px; margin: 2px 0;">Requer <strong>Observabilidade</strong> forte</li>
+                            <li style="font-size: 13px; margin: 2px 0;">Requer <strong>tráfego forte</strong> para identificar problemas</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 18: Conclusão -->
+        <div class="slide">
+            <div class="slide-header red">
+                Conclusão
+            </div>
+            <div class="slide-content" style="justify-content: center; text-align: center;">
+                <h1 style="font-size: 48px; color: #ff6b35; margin-bottom: 25px;">
+                    Obrigado!
+                </h1>
+                
+                <div class="highlight-box" style="max-width: 800px; margin: 0 auto; padding: 15px;">
+                    <h2 style="border: none; margin-bottom: 12px; font-size: 24px;">Principais Pontos</h2>
+                    <ul style="text-align: left; font-size: 16px; margin: 10px 0;">
+                        <li style="margin: 6px 0;"><strong>6 Pilares:</strong> Isolamento, Redundância, Tolerância, Auto-recuperação, Backpressure, Observabilidade</li>
+                        <li style="margin: 6px 0;"><strong>Timeouts, Retry, Circuit Breaker</strong> são fundamentais</li>
+                        <li style="margin: 6px 0;"><strong>Bulkhead</strong> isola recursos para evitar falhas em cascata</li>
+                        <li style="margin: 6px 0;"><strong>Estratégias de Deploy</strong> reduzem impacto e downtime</li>
+                        <li style="margin: 6px 0;"><strong>Resiliência</strong> é sobre continuar funcionando mesmo com falhas</li>
+                    </ul>
+                </div>
+
+                <div style="margin-top: 25px;">
+                    <p style="font-size: 20px; color: #666;">
+                        Arquitetura de Resiliência
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" onclick="previousSlide()">← Anterior</button>
+        <button class="nav-btn" onclick="nextSlide()">Próximo →</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            if (n >= totalSlides) {
+                currentSlide = 0;
+            } else if (n < 0) {
+                currentSlide = totalSlides - 1;
+            } else {
+                currentSlide = n;
+            }
+
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+
+            updateProgress();
+            updateCounter();
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function previousSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        function updateProgress() {
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progressBarFill').style.width = progress + '%';
+        }
+
+        function updateCounter() {
+            document.getElementById('slideCounter').textContent = `${currentSlide + 1} / ${totalSlides}`;
+        }
+
+        // Navegação por teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                previousSlide();
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                showSlide(0);
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                showSlide(totalSlides - 1);
+            }
+        });
+
+        // Inicialização
+        updateProgress();
+        updateCounter();
+
+        // Touch gestures para mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                nextSlide();
+            }
+            if (touchEndX > touchStartX + 50) {
+                previousSlide();
+            }
+        }
+    </script>
+</body>
+</html>
