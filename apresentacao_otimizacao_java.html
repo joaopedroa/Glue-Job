@@ -1,0 +1,1060 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otimização do Java</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #4facfe 0%, #ff6b35 100%);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .presentation-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slide {
+            display: none;
+            width: 90%;
+            max-width: 1200px;
+            height: 85vh;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            position: relative;
+            animation: slideIn 0.5s ease-out;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .slide-header {
+            padding: 18px 40px;
+            border-radius: 15px 15px 0 0;
+            margin: -40px -40px 15px -40px;
+            color: white;
+            font-size: 26px;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, #4facfe 0%, #ff6b35 100%);
+        }
+
+        .slide-header.blue { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .slide-header.green { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .slide-header.orange { background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 100%); }
+        .slide-header.purple { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .slide-header.red { background: linear-gradient(135deg, #4facfe 0%, #ff6b35 100%); }
+
+        .slide-content {
+            flex: 1;
+            padding: 5px 0;
+            line-height: 1.5;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .slide-content h1 {
+            font-size: 38px;
+            color: #ff6b35;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .slide-content h2 {
+            font-size: 26px;
+            color: #ff6b35;
+            margin: 15px 0 10px 0;
+            font-weight: 600;
+            border-bottom: 3px solid #ff6b35;
+            padding-bottom: 6px;
+        }
+
+        .slide-content h3 {
+            font-size: 20px;
+            color: #4facfe;
+            margin: 12px 0 8px 0;
+            font-weight: 600;
+        }
+
+        .slide-content p {
+            font-size: 17px;
+            color: #333;
+            margin: 10px 0;
+        }
+
+        .slide-content ul {
+            list-style: none;
+            padding-left: 0;
+            margin: 10px 0;
+        }
+
+        .slide-content li {
+            font-size: 16px;
+            color: #333;
+            margin: 8px 0;
+            padding-left: 30px;
+            position: relative;
+        }
+
+        .slide-content li:before {
+            content: "🔹";
+            position: absolute;
+            left: 0;
+            font-size: 20px;
+        }
+
+        .slide-content li strong {
+            color: #ff6b35;
+            font-weight: 600;
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, #4facfe15 0%, #ff6b3515 100%);
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 5px solid #ff6b35;
+            margin: 15px 0;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.1);
+        }
+
+        .highlight-box h3 {
+            color: #ff6b35;
+            margin-top: 0;
+        }
+
+        .info-box {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 5px solid #2196f3;
+            margin: 15px 0;
+        }
+
+        .info-box h3 {
+            color: #1976d2;
+            margin-top: 0;
+        }
+
+        .warning-box {
+            background: #fff3e0;
+            padding: 15px;
+            border-radius: 12px;
+            border-left: 5px solid #ff9800;
+            margin: 15px 0;
+        }
+
+        .warning-box h3 {
+            color: #f57c00;
+            margin-top: 0;
+        }
+
+        .code-block {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            margin: 12px 0;
+            overflow-x: auto;
+            border-left: 4px solid #ff6b35;
+        }
+
+        .code-block code {
+            color: #f8f8f2;
+        }
+
+        .component-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .component-card {
+            background: linear-gradient(135deg, #4facfe15 0%, #ff6b3515 100%);
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #ff6b35;
+            box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
+        }
+
+        .component-card h4 {
+            color: #ff6b35;
+            font-size: 18px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .component-card p {
+            font-size: 15px;
+            color: #555;
+            margin: 0;
+        }
+
+        .flow-diagram {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 12px;
+            margin: 12px 0;
+            border: 2px dashed #ff6b35;
+        }
+
+        .flow-step {
+            background: white;
+            padding: 10px;
+            margin: 6px 0;
+            border-radius: 8px;
+            border-left: 4px solid #ff6b35;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            font-size: 14px;
+        }
+
+        .flow-step strong {
+            color: #ff6b35;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            font-size: 15px;
+        }
+
+        .comparison-table th {
+            background: #ff6b35;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .comparison-table td {
+            padding: 10px 12px;
+            border-bottom: 1px solid #e0e0e0;
+            font-size: 14px;
+        }
+
+        .comparison-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .comparison-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid #ff6b35;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            color: #ff6b35;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn:hover {
+            background: #ff6b35;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 53, 0.4);
+        }
+
+        .nav-btn:active {
+            transform: translateY(0);
+        }
+
+        .slide-counter {
+            position: fixed;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #ff6b35;
+            border: 2px solid #ff6b35;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 107, 53, 0.2);
+            z-index: 1001;
+        }
+        
+        .progress-bar-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #4facfe 0%, #ff6b35 100%);
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .quote {
+            font-style: italic;
+            font-size: 18px;
+            color: #555;
+            border-left: 4px solid #ff6b35;
+            padding: 15px;
+            margin: 15px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .quote strong {
+            color: #ff6b35;
+            font-weight: 700;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                width: 95%;
+                padding: 30px;
+                height: 90vh;
+            }
+
+            .slide-header {
+                font-size: 24px;
+                padding: 20px;
+                margin: -30px -30px 20px -30px;
+            }
+
+            .slide-content h1 {
+                font-size: 32px;
+            }
+
+            .slide-content h2 {
+                font-size: 24px;
+            }
+
+            .slide-content li,
+            .slide-content p {
+                font-size: 16px;
+            }
+
+            .navigation {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .component-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-bar">
+        <div class="progress-bar-fill" id="progressBarFill"></div>
+    </div>
+    <div class="slide-counter" id="slideCounter">1 / 17</div>
+
+    <div class="presentation-container">
+        <!-- Slide 1: Título -->
+        <div class="slide active">
+            <div class="slide-header red">
+                Otimização do Java
+            </div>
+            <div class="slide-content" style="justify-content: center; text-align: center;">
+                <h1 style="font-size: 56px; margin-bottom: 30px; color: #ff6b35;">
+                    Otimização do Java
+                </h1>
+                <p style="font-size: 28px; color: #666; margin-top: 20px;">
+                    JIT, AOT, GraalVM e Garbage Collectors
+                </p>
+                <div style="margin-top: 50px;">
+                    <p style="font-size: 20px; color: #999;">
+                        Apresentação para Gestão
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Compilação Java e ClassLoader -->
+        <div class="slide">
+            <div class="slide-header blue">
+                Compilação Java e ClassLoader
+            </div>
+            <div class="slide-content">
+                <h2>Do Código Fonte ao Bytecode</h2>
+                
+                <div class="flow-diagram">
+                    <div class="flow-step">
+                        <strong>1.</strong> Arquivos <code>.java</code> são compilados pelo <strong>javac</strong>
+                    </div>
+                    <div class="flow-step">
+                        <strong>2.</strong> Gera arquivos <strong>.class</strong> (bytecode)
+                    </div>
+                    <div class="flow-step">
+                        <strong>3.</strong> <strong>ClassLoader</strong> (componente da JVM) carrega e lê os arquivos .class
+                    </div>
+                    <div class="flow-step">
+                        <strong>4.</strong> Transforma em estrutura interna que a JVM entende
+                    </div>
+                </div>
+
+                <div class="info-box" style="margin-top: 15px;">
+                    <p style="font-size: 16px; margin: 0;">
+                        O <strong>ClassLoader</strong> é responsável por carregar as classes em tempo de execução e 
+                        prepará-las para serem executadas pela JVM.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: JIT - Conceito -->
+        <div class="slide">
+            <div class="slide-header green">
+                JIT (Just in Time)
+            </div>
+            <div class="slide-content">
+                <h2>O que é JIT?</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        <strong>JIT</strong> é um compilador Java que transforma o <strong>bytecode em código nativo</strong> 
+                        (binário CPU) <strong>durante a execução</strong>.
+                    </p>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 15px;">
+                    <h3>⚡ Como funciona?</h3>
+                    <ul style="margin: 8px 0;">
+                        <li style="font-size: 15px; margin: 5px 0;">JVM começa <strong>interpretando</strong> o bytecode</li>
+                        <li style="font-size: 15px; margin: 5px 0;">Verifica <strong>hotspots</strong> através de contadores internos</li>
+                        <li style="font-size: 15px; margin: 5px 0;">Quando o método <strong>"esquenta"</strong> (hotspot), o JIT compila para código de máquina</li>
+                        <li style="font-size: 15px; margin: 5px 0;">Gera <strong>alta performance</strong> para código frequentemente executado</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: JIT - Compiladores C1 e C2 -->
+        <div class="slide">
+            <div class="slide-header orange">
+                JIT - Compiladores C1 e C2
+            </div>
+            <div class="slide-content">
+                <h2>Dois Compiladores, Duas Estratégias</h2>
+                
+                <div class="component-grid" style="grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 12px 0;">
+                    <div class="component-card" style="padding: 15px;">
+                        <h4>C1 (Client Compiler)</h4>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            <li style="font-size: 14px; margin: 4px 0;">⚡ <strong>Rápido</strong> para compilar</li>
+                            <li style="font-size: 14px; margin: 4px 0;">📝 <strong>Simples</strong></li>
+                            <li style="font-size: 14px; margin: 4px 0;">🔍 <strong>Pouca otimização</strong></li>
+                            <li style="font-size: 14px; margin: 4px 0;">📊 Coleta dados para o C2</li>
+                        </ul>
+                    </div>
+                    <div class="component-card" style="padding: 15px;">
+                        <h4>C2 (Server Compiler)</h4>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            <li style="font-size: 14px; margin: 4px 0;">⏱️ <strong>Lento</strong> para compilar</li>
+                            <li style="font-size: 14px; margin: 4px 0;">🚀 <strong>Código super otimizado</strong></li>
+                            <li style="font-size: 14px; margin: 4px 0;">🎯 Usa dados coletados pelo C1</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 15px; padding: 12px;">
+                    <p style="font-size: 15px; margin: 0;">
+                        <strong>OBSERVAÇÃO:</strong> O C1 coleta todos os dados para que o C2 consiga fazer otimizações avançadas.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: C2 - Otimizações -->
+        <div class="slide">
+            <div class="slide-header purple">
+                C2 - Otimizações Avançadas
+            </div>
+            <div class="slide-content">
+                <h2>O que o C2 pode fazer?</h2>
+                
+                <div class="component-grid" style="grid-template-columns: 1fr; gap: 10px; margin: 10px 0;">
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🔗 Inline Agressivo</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">Transforma métodos em linhas de código para economizar lookup de métodos e criação de stack frame</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🏃 Escape Analysis</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">Verifica se objeto escapa (retorna, atribui valor). Se não escapar, otimiza guardando na stack ao invés da heap</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🔄 Loop Unrolling</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">Desdobramento de loops - remove for e transforma para ficar mais otimizado</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🎯 Branch Prediction</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">Otimiza IFs. Se 98% cai na mesma condição, otimiza para esse caminho</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🔮 Compilação Especulativa</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">JVM especula e otimiza. Faz rollback caso caia em cenário diferente</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Tiered Compilation -->
+        <div class="slide">
+            <div class="slide-header blue">
+                Tiered Compilation
+            </div>
+            <div class="slide-content">
+                <h2>Compilação em Camadas</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        O processo de usar <strong>dois compiladores</strong> (C1 e C2) é chamado de 
+                        <strong>Tiered Compilation</strong> (Compilação em camadas).
+                    </p>
+                </div>
+
+                <div class="flow-diagram" style="margin-top: 15px;">
+                    <div class="flow-step">
+                        <strong>1.</strong> JVM <strong>não começa</strong> com C2 (seria muito caro)
+                    </div>
+                    <div class="flow-step">
+                        <strong>2.</strong> Primeiro executa com <strong>C1</strong> (rápido, coleta dados)
+                    </div>
+                    <div class="flow-step">
+                        <strong>3.</strong> Depois faz a compilação com <strong>C2</strong> (otimizado)
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 15px; padding: 12px;">
+                    <p style="font-size: 15px; margin: 0;">
+                        Essa estratégia permite <strong>startup rápido</strong> com C1 e <strong>performance máxima</strong> com C2.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: AOT -->
+        <div class="slide">
+            <div class="slide-header green">
+                AOT (Ahead of Time)
+            </div>
+            <div class="slide-content">
+                <h2>Compilação Antecipada</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        <strong>AOT</strong> compila o bytecode para <strong>binário nativo antes de rodar</strong>.
+                        Exemplos: <strong>GraalVM</strong>, <strong>Quarkus Native</strong>.
+                    </p>
+                </div>
+
+                <div class="component-grid" style="grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 12px 0;">
+                    <div class="component-card" style="padding: 12px; border-color: #4facfe;">
+                        <h4 style="color: #4facfe;">✅ Benefícios</h4>
+                        <ul style="margin-top: 8px; padding-left: 20px;">
+                            <li style="font-size: 14px; margin: 3px 0;">⚡ Startup menor</li>
+                            <li style="font-size: 14px; margin: 3px 0;">💾 Menor uso de memória</li>
+                        </ul>
+                    </div>
+                    <div class="component-card" style="padding: 12px; border-color: #ff6b35;">
+                        <h4 style="color: #ff6b35;">⚠️ Malefícios</h4>
+                        <ul style="margin-top: 8px; padding-left: 20px;">
+                            <li style="font-size: 14px; margin: 3px 0;">❌ Sem otimização dinâmica</li>
+                            <li style="font-size: 14px; margin: 3px 0;">📉 Performance de longa duração pior que JIT</li>
+                            <li style="font-size: 14px; margin: 3px 0;">🔍 Dificuldade em usar reflection</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 15px; padding: 12px;">
+                    <p style="font-size: 15px; margin: 0;">
+                        <strong>Substrate VM:</strong> Código nativo embute uma JVM minimalista para GC, Threads e pacotes específicos.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: GraalVM -->
+        <div class="slide">
+            <div class="slide-header orange">
+                GraalVM
+            </div>
+            <div class="slide-content">
+                <h2>Plataforma de Alto Desempenho</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        <strong>GraalVM</strong> é uma plataforma de execução de alto desempenho criada pela Oracle Labs. 
+                        Foi criada para ser <strong>poliglota</strong> (Java, JS, Python, Ruby, etc).
+                    </p>
+                </div>
+
+                <div class="component-grid" style="grid-template-columns: 1fr; gap: 12px; margin: 12px 0;">
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🔥 GraalVM HotSpot</h4>
+                        <p style="font-size: 14px; margin-top: 8px;">Substitui o <strong>C2 do JIT</strong> por <strong>Graal JIT Compiler</strong></p>
+                        <p style="font-size: 13px; margin-top: 5px; color: #666;">Graal JIT é escrito em Java, C2 é escrito em C++</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🚀 GraalVM Native Image (AOT)</h4>
+                        <p style="font-size: 14px; margin-top: 8px;">Funcionalidade mais conhecida do GraalVM</p>
+                        <div class="code-block" style="margin-top: 8px; font-size: 11px; padding: 10px;">
+native-image -jar minha-app.jar
+                        </div>
+                        <p style="font-size: 13px; margin-top: 5px; color: #666;">Gera binário nativo, sem JVM, sem JIT, startup muito rápida e memória reduzida</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 9: Stack vs Heap -->
+        <div class="slide">
+            <div class="slide-header purple">
+                Stack vs Heap
+            </div>
+            <div class="slide-content">
+                <h2>Duas Memórias, Dois Propósitos</h2>
+                
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th>Stack</th>
+                            <th>Heap</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Memória da <strong>thread</strong></td>
+                            <td>Memória <strong>compartilhada</strong> entre threads</td>
+                        </tr>
+                        <tr>
+                            <td>⚡ <strong>Extremamente rápida</strong></td>
+                            <td>🐌 Mais lenta (gerenciada pelo GC)</td>
+                        </tr>
+                        <tr>
+                            <td>Não guarda objetos, apenas <strong>referências e primitivos</strong></td>
+                            <td>Guarda <strong>objetos e arrays</strong></td>
+                        </tr>
+                        <tr>
+                            <td>Stack frame criado/destruído com método</td>
+                            <td>Controlada pelo <strong>Garbage Collector</strong></td>
+                        </tr>
+                        <tr>
+                            <td>StackOverflow quando acaba</td>
+                            <td>Java heap space quando acaba</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="highlight-box" style="margin-top: 15px; padding: 12px;">
+                    <p style="font-size: 15px; margin: 0;">
+                        <strong>Exemplo:</strong> <code>Pessoa a = new Pessoa()</code> → Pessoa na heap, referência "a" na stack.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10: Heap - Estrutura -->
+        <div class="slide">
+            <div class="slide-header blue">
+                Heap - Estrutura
+            </div>
+            <div class="slide-content">
+                <h2>Organização da Heap</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        A JVM divide a heap em <strong>duas grandes áreas</strong> para otimizar o Garbage Collector.
+                    </p>
+                </div>
+
+                <div class="component-grid" style="grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 15px 0;">
+                    <div class="component-card" style="padding: 15px;">
+                        <h4>🌱 Young Generation</h4>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            <li style="font-size: 14px; margin: 4px 0;"><strong>Eden</strong> - novos objetos</li>
+                            <li style="font-size: 14px; margin: 4px 0;"><strong>Survivors</strong> (S0, S1) - objetos que sobreviveram</li>
+                        </ul>
+                        <p style="font-size: 13px; margin-top: 10px; color: #666;">Muitos objetos morrem rápido aqui</p>
+                    </div>
+                    <div class="component-card" style="padding: 15px;">
+                        <h4>🌳 Old Generation</h4>
+                        <p style="font-size: 14px; margin-top: 10px;">Objetos que sobreviveram várias coletas</p>
+                        <p style="font-size: 13px; margin-top: 8px; color: #666;">Coletada menos frequentemente</p>
+                    </div>
+                </div>
+
+                <div class="warning-box" style="margin-top: 15px; padding: 12px;">
+                    <h3 style="font-size: 18px; margin-bottom: 8px;">⚠️ Full GC</h3>
+                    <p style="font-size: 15px; margin: 0;">
+                        Quando acontece um <strong>Full GC</strong>, você está muito perto de receber um <strong>OutOfMemory</strong>. 
+                        Sua API vai cair e ficar um caos provavelmente.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11: Garbage Collectors - Conceito -->
+        <div class="slide">
+            <div class="slide-header green">
+                Garbage Collectors
+            </div>
+            <div class="slide-content">
+                <h2>Por que Stack não é coletada?</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <ul style="margin: 8px 0;">
+                        <li style="font-size: 15px; margin: 5px 0;">Stack tem <strong>vida automática</strong> - stack frame é destruído quando método finaliza</li>
+                        <li style="font-size: 15px; margin: 5px 0;">Stack <strong>nunca guarda objetos</strong>, apenas referências e valores primitivos</li>
+                        <li style="font-size: 15px; margin: 5px 0;">Stack <strong>não é coletada</strong> pelo GC, porém <strong>é lida</strong> pelo GC</li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 15px; padding: 12px;">
+                    <p style="font-size: 15px; margin: 0;">
+                        <strong>Regra importante:</strong> Qualquer objeto que tenha referência na stack <strong>não pode ser coletado</strong> na heap.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: G1 GC -->
+        <div class="slide">
+            <div class="slide-header orange">
+                G1 GC (Garbage First)
+            </div>
+            <div class="slide-content">
+                <h2>O Garbage Collector Padrão</h2>
+                
+                <div class="info-box" style="padding: 15px; margin: 12px 0;">
+                    <p style="font-size: 17px; margin: 0;">
+                        <strong>G1 GC</strong> virou o default desde o <strong>Java 9</strong>.
+                    </p>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 15px;">
+                    <h3>🎯 Características</h3>
+                    <ul style="margin: 8px 0;">
+                        <li style="font-size: 15px; margin: 5px 0;"><strong>Objetivo:</strong> Pausas curtas, previsíveis e heap grande (até 64GB)</li>
+                        <li style="font-size: 15px; margin: 5px 0;"><strong>Estratégia:</strong> Heap dividida em pequenas regiões de até 32MB</li>
+                        <li style="font-size: 15px; margin: 5px 0;"><strong>Coleta:</strong> Primeiro as regiões com mais lixo (Garbage First)</li>
+                        <li style="font-size: 15px; margin: 5px 0;"><strong>Frequência:</strong> Roda mais frequentemente</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 13: ZGC e Shenandoah -->
+        <div class="slide">
+            <div class="slide-header purple">
+                ZGC e Shenandoah
+            </div>
+            <div class="slide-content">
+                <h2>GCs de Ultra Baixa Latência</h2>
+                
+                <div class="component-grid" style="grid-template-columns: repeat(2, 1fr); gap: 15px; margin: 12px 0;">
+                    <div class="component-card" style="padding: 15px;">
+                        <h4>⚡ ZGC</h4>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            <li style="font-size: 14px; margin: 4px 0;">Pausas <strong>ultra curtas</strong> (&lt; 1ms)</li>
+                            <li style="font-size: 14px; margin: 4px 0;">GC mais <strong>avançado</strong> já criado</li>
+                            <li style="font-size: 14px; margin: 4px 0;">⚠️ Gasta <strong>muito CPU</strong></li>
+                            <li style="font-size: 14px; margin: 4px 0;">Ideal para heap &gt; 8GB-16GB</li>
+                        </ul>
+                    </div>
+                    <div class="component-card" style="padding: 15px;">
+                        <h4>🚀 Shenandoah</h4>
+                        <ul style="margin-top: 10px; padding-left: 20px;">
+                            <li style="font-size: 14px; margin: 4px 0;">Objetivo: <strong>baixa latência</strong> (&lt; 10ms)</li>
+                            <li style="font-size: 14px; margin: 4px 0;">Bom equilíbrio</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="warning-box" style="margin-top: 15px; padding: 12px;">
+                    <h3 style="font-size: 18px; margin-bottom: 8px;">Por que não usar sempre ZGC?</h3>
+                    <p style="font-size: 15px; margin: 0;">
+                        ZGC precisa de <strong>mais memória e CPU</strong>. É bom para performance e baixa latência, 
+                        porém <strong>compromete throughput</strong>.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14: GC - Impacto na Performance -->
+        <div class="slide">
+            <div class="slide-header blue">
+                GC - Impacto na Performance
+            </div>
+            <div class="slide-content">
+                <h2>Por que GC é Importante?</h2>
+                
+                <div class="warning-box" style="padding: 15px; margin: 12px 0;">
+                    <h3 style="font-size: 18px; margin-bottom: 8px;">⏸️ STW - Stop the World</h3>
+                    <p style="font-size: 15px; margin: 0;">
+                        GC causa <strong>pausa em todas as threads</strong>. Se a pausa dura 100ms, sua API fica 
+                        <strong>100ms congelada</strong>. GC mal configurado pode causar pausas de 200ms até 1 segundo.
+                    </p>
+                </div>
+
+                <div class="component-grid" style="grid-template-columns: 1fr; gap: 10px; margin: 12px 0;">
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>📈 Throughput</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">GC usando muita CPU = menos CPU para processar requisições</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>❄️ Cold Start</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">Algumas escolhas de GC podem impactar no cold start (ZGC e Shenandoah são mais complexos)</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>📊 Picos de Tráfego</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">Mais requisições = mais objetos = mais lixo = GC trabalha mais. Heap pequeno pode causar Full GC</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 15: GC - Problemas Comuns -->
+        <div class="slide">
+            <div class="slide-header green">
+                GC - Problemas Comuns
+            </div>
+            <div class="slide-content">
+                <h2>Quando a API Cria Muitos Objetos</h2>
+                
+                <div class="warning-box" style="padding: 15px; margin: 12px 0;">
+                    <h3 style="font-size: 18px; margin-bottom: 8px;">⚠️ Consequências</h3>
+                    <ul style="margin: 8px 0;">
+                        <li style="font-size: 15px; margin: 5px 0;">Gera <strong>lixo rápido</strong> fazendo GC trabalhar mais</li>
+                        <li style="font-size: 15px; margin: 5px 0;">Pode gerar <strong>aumento de CPU</strong></li>
+                        <li style="font-size: 15px; margin: 5px 0;">Geração de <strong>pausas</strong></li>
+                        <li style="font-size: 15px; margin: 5px 0;"><strong>Aumento do tempo de resposta</strong></li>
+                    </ul>
+                </div>
+
+                <div class="highlight-box" style="margin-top: 15px; padding: 12px;">
+                    <h3>💡 Soluções</h3>
+                    <ul style="margin: 8px 0;">
+                        <li style="font-size: 15px; margin: 5px 0;">Reduzir criação de objetos desnecessários</li>
+                        <li style="font-size: 15px; margin: 5px 0;">Usar object pooling quando apropriado</li>
+                        <li style="font-size: 15px; margin: 5px 0;">Monitorar métricas de GC</li>
+                        <li style="font-size: 15px; margin: 5px 0;">Ajustar tamanho da heap conforme necessário</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 16: GC - Métricas e Monitoramento -->
+        <div class="slide">
+            <div class="slide-header orange">
+                GC - Métricas e Monitoramento
+            </div>
+            <div class="slide-content">
+                <h2>Como Medir Pausas do GC?</h2>
+                
+                <div class="component-grid" style="grid-template-columns: 1fr; gap: 12px; margin: 12px 0;">
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>📝 Log do Garbage Collector</h4>
+                        <div class="code-block" style="margin-top: 8px; font-size: 11px; padding: 10px;">
+JAVA_OPTS="-Xlog:gc*:file=/logs/gc.log:time,level,tags"
+                        </div>
+                        <p style="font-size: 13px; margin-top: 5px; color: #666;">Ativa logs detalhados do GC para análise</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>📊 APM (DataDog, New Relic, etc)</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">Ferramentas de monitoramento que mostram métricas de GC em tempo real</p>
+                    </div>
+                    <div class="component-card" style="padding: 12px;">
+                        <h4>🔧 Micrometer + Actuator</h4>
+                        <p style="font-size: 14px; margin-top: 5px;">Expõe métricas da JVM:</p>
+                        <ul style="margin-top: 5px; padding-left: 20px; font-size: 13px;">
+                            <li style="margin: 2px 0;"><code>jvm.gc.pause</code></li>
+                            <li style="margin: 2px 0;"><code>jvm.gc.max_data_size</code></li>
+                            <li style="margin: 2px 0;"><code>jvm.gc.memory.allocated</code></li>
+                            <li style="margin: 2px 0;"><code>jvm.memory.used</code></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 17: Conclusão -->
+        <div class="slide">
+            <div class="slide-header red">
+                Conclusão
+            </div>
+            <div class="slide-content" style="justify-content: center; text-align: center;">
+                <h1 style="font-size: 48px; color: #ff6b35; margin-bottom: 25px;">
+                    Obrigado!
+                </h1>
+                
+                <div class="highlight-box" style="max-width: 800px; margin: 0 auto; padding: 15px;">
+                    <h2 style="border: none; margin-bottom: 12px; font-size: 24px;">Principais Pontos</h2>
+                    <ul style="text-align: left; font-size: 16px; margin: 10px 0;">
+                        <li style="margin: 6px 0;"><strong>JIT</strong> compila bytecode para código nativo durante execução</li>
+                        <li style="margin: 6px 0;"><strong>Tiered Compilation</strong> usa C1 (rápido) e C2 (otimizado)</li>
+                        <li style="margin: 6px 0;"><strong>AOT</strong> compila antes de rodar (startup rápido, menos memória)</li>
+                        <li style="margin: 6px 0;"><strong>Stack</strong> é rápida, <strong>Heap</strong> é gerenciada pelo GC</li>
+                        <li style="margin: 6px 0;"><strong>GC</strong> impacta diretamente na performance da API</li>
+                    </ul>
+                </div>
+
+                <div style="margin-top: 25px;">
+                    <p style="font-size: 20px; color: #666;">
+                        Otimização do Java
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="navigation">
+        <button class="nav-btn" onclick="previousSlide()">← Anterior</button>
+        <button class="nav-btn" onclick="nextSlide()">Próximo →</button>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const totalSlides = slides.length;
+
+        function showSlide(n) {
+            if (n >= totalSlides) {
+                currentSlide = 0;
+            } else if (n < 0) {
+                currentSlide = totalSlides - 1;
+            } else {
+                currentSlide = n;
+            }
+
+            slides.forEach((slide, index) => {
+                slide.classList.remove('active');
+                if (index === currentSlide) {
+                    slide.classList.add('active');
+                }
+            });
+
+            updateProgress();
+            updateCounter();
+        }
+
+        function nextSlide() {
+            showSlide(currentSlide + 1);
+        }
+
+        function previousSlide() {
+            showSlide(currentSlide - 1);
+        }
+
+        function updateProgress() {
+            const progress = ((currentSlide + 1) / totalSlides) * 100;
+            document.getElementById('progressBarFill').style.width = progress + '%';
+        }
+
+        function updateCounter() {
+            document.getElementById('slideCounter').textContent = `${currentSlide + 1} / ${totalSlides}`;
+        }
+
+        // Navegação por teclado
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                e.preventDefault();
+                nextSlide();
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                e.preventDefault();
+                previousSlide();
+            } else if (e.key === 'Home') {
+                e.preventDefault();
+                showSlide(0);
+            } else if (e.key === 'End') {
+                e.preventDefault();
+                showSlide(totalSlides - 1);
+            }
+        });
+
+        // Inicialização
+        updateProgress();
+        updateCounter();
+
+        // Touch gestures para mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                nextSlide();
+            }
+            if (touchEndX > touchStartX + 50) {
+                previousSlide();
+            }
+        }
+    </script>
+</body>
+</html>
