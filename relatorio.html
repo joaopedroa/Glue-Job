@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Relatório - Consulta Lazy</title>
+    <title>Relatório - Projeto Consulta Lazy</title>
     <style>
         * {
             margin: 0;
@@ -12,95 +12,99 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f5f5f5;
             color: #333;
-            padding: 20px;
-            min-height: 100vh;
             line-height: 1.6;
+            padding: 20px;
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1100px;
             margin: 0 auto;
             background: white;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
 
+        /* Header */
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #ff6900;
             color: white;
-            padding: 50px 40px;
-            text-align: center;
+            padding: 40px 50px;
         }
 
         .header h1 {
-            font-size: 2.8em;
+            font-size: 2.2em;
             margin-bottom: 10px;
-            font-weight: 300;
-            letter-spacing: 1px;
+            font-weight: 600;
         }
 
         .header p {
-            font-size: 1.3em;
+            font-size: 1.1em;
             opacity: 0.95;
-            font-weight: 300;
         }
 
+        /* Conteúdo */
         .content {
-            padding: 50px 40px;
+            padding: 40px 50px;
         }
 
+        /* Seções */
         .section {
             margin-bottom: 50px;
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 35px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
         }
 
         .section h2 {
-            color: #667eea;
+            color: #ff6900;
+            font-size: 1.8em;
             margin-bottom: 25px;
-            font-size: 2em;
-            font-weight: 400;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 15px;
+            font-weight: 600;
+            border-bottom: 3px solid #ff6900;
+            padding-bottom: 10px;
         }
 
         .section h3 {
-            color: #764ba2;
-            margin-top: 30px;
+            color: #e85d00;
+            font-size: 1.3em;
+            margin-top: 25px;
             margin-bottom: 15px;
-            font-size: 1.5em;
-            font-weight: 400;
+            font-weight: 600;
         }
 
         .section p {
             margin-bottom: 15px;
-            font-size: 1.1em;
-            text-align: justify;
+            color: #555;
+            font-size: 1.05em;
         }
 
+        /* Objetivos */
+        .objectives {
+            background: #fff8f3;
+            border-left: 4px solid #ff6900;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+
+        .objectives p {
+            margin-bottom: 12px;
+        }
+
+        /* Timeline */
         .timeline {
-            margin-top: 30px;
+            margin-top: 20px;
         }
 
         .timeline-item {
-            background: white;
-            border-left: 4px solid #667eea;
-            padding: 20px;
-            margin-bottom: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 3px solid #ff6900;
+            padding-left: 25px;
+            margin-bottom: 30px;
+            padding-bottom: 25px;
         }
 
         .timeline-date {
-            font-weight: 600;
-            color: #667eea;
-            font-size: 1.2em;
+            font-weight: 700;
+            color: #ff6900;
+            font-size: 1.1em;
             margin-bottom: 10px;
         }
 
@@ -111,68 +115,98 @@
 
         .timeline-content li {
             margin-bottom: 8px;
-            font-size: 1.05em;
+            color: #555;
         }
 
-        .problems-list {
-            margin-top: 25px;
+        .timeline-content ul ul {
+            margin-left: 20px;
+            margin-top: 8px;
         }
 
+        .timeline-content ul ul li {
+            color: #777;
+            font-size: 0.95em;
+        }
+
+        /* Problemas */
         .problem-item {
-            background: white;
-            border-left: 4px solid #e74c3c;
+            background: #fff8f3;
+            border-left: 4px solid #ff6900;
             padding: 25px;
             margin-bottom: 25px;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .problem-item h4 {
-            color: #e74c3c;
+            color: #ff6900;
             font-size: 1.3em;
             margin-bottom: 15px;
-            font-weight: 500;
+            font-weight: 600;
         }
 
-        .solution-item {
-            background: #e8f5e9;
-            border-left: 4px solid #4caf50;
+        .problem-item .problem-text {
+            background: #ffe8d6;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+
+        .problem-item .problem-text strong {
+            color: #e85d00;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .solution {
+            background: #f0f8f0;
+            border-left: 4px solid #28a745;
             padding: 20px;
             margin-top: 15px;
-            border-radius: 8px;
+            border-radius: 4px;
         }
 
-        .solution-item h5 {
-            color: #2e7d32;
+        .solution h5 {
+            color: #28a745;
             font-size: 1.1em;
-            margin-bottom: 10px;
-            font-weight: 500;
+            margin-bottom: 12px;
+            font-weight: 600;
         }
 
-        .solution-item ul {
+        .solution ul {
             margin-left: 20px;
             margin-top: 10px;
         }
 
-        .solution-item li {
+        .solution li {
             margin-bottom: 8px;
-            color: #333;
+            color: #555;
         }
 
-        .highlight-box {
-            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
-            border-left: 4px solid #667eea;
-            padding: 25px;
-            margin: 25px 0;
-            border-radius: 8px;
-        }
-
+        /* Footer */
         .footer {
-            background: #f8f9fa;
-            padding: 30px;
+            background: #f5f5f5;
+            padding: 25px 50px;
             text-align: center;
             color: #666;
-            border-top: 1px solid #e0e0e0;
+            border-top: 1px solid #ddd;
+        }
+
+        /* Responsivo */
+        @media (max-width: 768px) {
+            .header {
+                padding: 30px 25px;
+            }
+
+            .header h1 {
+                font-size: 1.8em;
+            }
+
+            .content {
+                padding: 30px 25px;
+            }
+
+            .section h2 {
+                font-size: 1.5em;
+            }
         }
 
         @media print {
@@ -180,52 +214,41 @@
                 background: white;
                 padding: 0;
             }
+
             .container {
                 box-shadow: none;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2em;
-            }
-            .content {
-                padding: 25px;
-            }
-            .section {
-                padding: 25px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Header -->
         <div class="header">
-            <h1>Relatório - Consulta Lazy</h1>
-            <p>Análise e Documentação do Projeto</p>
+            <h1>Relatório - Projeto Consulta Lazy</h1>
+            <p>Otimização de Custos com Mainframe | Out/2025 - Dez/2025</p>
         </div>
 
+        <!-- Conteúdo -->
         <div class="content">
-            <!-- Seção: Objetivos e Conceitos -->
-            <div class="section">
-                <h2>Visão Geral</h2>
+            <!-- Objetivos -->
+            <section class="section">
+                <h2>Objetivos do Projeto</h2>
                 
-                <div class="highlight-box">
-                    <h3>Objetivo da Consulta Lazy</h3>
-                    <p>A consulta lazy tem como objetivo diminuir as consultas ao mainframe, consequentemente, diminuindo o custo com MIPS.</p>
-                    <p>Seu objetivo não está diretamente ligado ao tempo de resposta e melhorias de performance, mas sim, na diminuição dos custos referente ao mainframe.</p>
+                <div class="objectives">
+                    <p><strong>Redução de Custos:</strong> A consulta lazy tem como objetivo diminuir as consultas ao mainframe, consequentemente, diminuindo o custo com MIPS.</p>
+                    
+                    <p><strong>Foco Estratégico:</strong> Seu objetivo não está diretamente ligado ao tempo de resposta e melhorias de performance, mas sim, na diminuição dos custos referente ao mainframe.</p>
+                    
+                    <p><strong>Funcionamento:</strong> A consulta Lazy utiliza uma lógica na qual busca as informações da consulta otimizada (DynamoDB) e realiza algumas validações para saber se o dado é ou não confiável para ser entregue ao cliente.</p>
                 </div>
+            </section>
 
-                <h3>Funcionamento</h3>
-                <p>A consulta Lazy utiliza uma lógica na qual busca as informações da consulta otimizada (DynamoDB) e realiza algumas validações para saber se o dado é ou não confiável para ser entregue ao cliente.</p>
-            </div>
-
-            <!-- Seção: Linha do Tempo -->
-            <div class="section">
-                <h2>Linha do Tempo do Projeto</h2>
+            <!-- Timeline -->
+            <section class="section">
+                <h2>Cronologia do Projeto</h2>
                 
                 <div class="timeline">
-                    <!-- 31/10/2025 -->
                     <div class="timeline-item">
                         <div class="timeline-date">31/10/2025</div>
                         <div class="timeline-content">
@@ -236,7 +259,6 @@
                         </div>
                     </div>
 
-                    <!-- 04/11/2025 -->
                     <div class="timeline-item">
                         <div class="timeline-date">04/11/2025</div>
                         <div class="timeline-content">
@@ -251,7 +273,6 @@
                         </div>
                     </div>
 
-                    <!-- 18/11/2025 -->
                     <div class="timeline-item">
                         <div class="timeline-date">18/11/2025</div>
                         <div class="timeline-content">
@@ -262,7 +283,6 @@
                         </div>
                     </div>
 
-                    <!-- 24/11/2025 -->
                     <div class="timeline-item">
                         <div class="timeline-date">24/11/2025</div>
                         <div class="timeline-content">
@@ -273,7 +293,6 @@
                         </div>
                     </div>
 
-                    <!-- 27/11/2025 -->
                     <div class="timeline-item">
                         <div class="timeline-date">27/11/2025</div>
                         <div class="timeline-content">
@@ -285,7 +304,6 @@
                         </div>
                     </div>
 
-                    <!-- 28/11/2025 -->
                     <div class="timeline-item">
                         <div class="timeline-date">28/11/2025</div>
                         <div class="timeline-content">
@@ -300,7 +318,6 @@
                         </div>
                     </div>
 
-                    <!-- 01/12/2025 -->
                     <div class="timeline-item">
                         <div class="timeline-date">01/12/2025</div>
                         <div class="timeline-content">
@@ -311,7 +328,6 @@
                         </div>
                     </div>
 
-                    <!-- 02/12/2025 -->
                     <div class="timeline-item">
                         <div class="timeline-date">02/12/2025</div>
                         <div class="timeline-content">
@@ -322,7 +338,6 @@
                         </div>
                     </div>
 
-                    <!-- 03/12/2025 -->
                     <div class="timeline-item">
                         <div class="timeline-date">03/12/2025</div>
                         <div class="timeline-content">
@@ -332,7 +347,6 @@
                         </div>
                     </div>
 
-                    <!-- 09/12/2025 -->
                     <div class="timeline-item">
                         <div class="timeline-date">09/12/2025</div>
                         <div class="timeline-content">
@@ -342,7 +356,6 @@
                         </div>
                     </div>
 
-                    <!-- 10/12/2025 -->
                     <div class="timeline-item">
                         <div class="timeline-date">10/12/2025</div>
                         <div class="timeline-content">
@@ -354,73 +367,79 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Seção: Problemas e Soluções -->
-            <div class="section">
-                <h2>Problemas Encontrados Durante a Consulta Lazy</h2>
+            <!-- Problemas e Soluções -->
+            <section class="section">
+                <h2>Problemas Identificados e Soluções</h2>
                 
-                <div class="problems-list">
-                    <!-- Problema 1 -->
-                    <div class="problem-item">
-                        <h4>1. Consulta Eventualmente Consistente (Eventually Consistent Query)</h4>
-                        <p><strong>Problema:</strong> Consumidores não podemos trabalhar com dado eventualmente consistente.</p>
-                        <div class="solution-item">
-                            <h5>Solução Implementada:</h5>
-                            <ul>
-                                <li>Indicador de processamento batch</li>
-                                <li>Janela controlada para não impactar clientes</li>
-                            </ul>
-                        </div>
+                <div class="problem-item">
+                    <h4>1. Consulta Eventualmente Consistente</h4>
+                    <div class="problem-text">
+                        <strong>Problema:</strong>
+                        Consumidores não podemos trabalhar com dado eventualmente consistente.
                     </div>
-
-                    <!-- Problema 2 -->
-                    <div class="problem-item">
-                        <h4>2. Desfazimento de Operações</h4>
-                        <p><strong>Problema:</strong> Operações contratadas eram registradas no DynamoDB, porém na sequência eram excluídas/desfeitas e consulta não reagia ao evento.</p>
-                        <div class="solution-item">
-                            <h5>Solução Implementada:</h5>
-                            <ul>
-                                <li>Escutamos os eventos de desfazimento de contratação e deletamos da base do DynamoDB</li>
-                                <li>Paliativamente excluímos todas as operações desfeitas no ano de 2025 com um script Python</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Problema 3 -->
-                    <div class="problem-item">
-                        <h4>3. Carga Full do dia 18/10/2025 para SF5</h4>
-                        <p><strong>Problema:</strong> No dia 18/10 foi realizada a carga full para as operações do SF5, porém essa carga não excluiu operações que estavam ativas no DynamoDB e expurgadas da base do DB2.</p>
-                        <div class="solution-item">
-                            <h5>Solução Implementada:</h5>
-                            <ul>
-                                <li>Fizemos a exclusão lógica dos dados que estavam com a carga do SF5 anterior a 18/10/2025</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <!-- Problema 4 -->
-                    <div class="problem-item">
-                        <h4>4. Janela de 13/06/2025 até 21/06/2025</h4>
-                        <p><strong>Problema:</strong> Na primeira semana do CDC fizemos um piloto e identificamos que havia um problema no tipo de dado que o CDC inputava na tabela, fazendo com que o Glue nunca atualizasse a operação, deixando os dados desse intervalo desatualizados.</p>
-                        <div class="solution-item">
-                            <h5>Solução Implementada:</h5>
-                            <ul>
-                                <li>Fizemos a exclusão lógica dos dados que estavam neste intervalo</li>
-                            </ul>
-                        </div>
+                    <div class="solution">
+                        <h5>Solução Implementada:</h5>
+                        <ul>
+                            <li>Indicador de processamento batch</li>
+                            <li>Janela controlada para não impactar clientes</li>
+                        </ul>
                     </div>
                 </div>
-            </div>
+
+                <div class="problem-item">
+                    <h4>2. Desfazimento de Operações</h4>
+                    <div class="problem-text">
+                        <strong>Problema:</strong>
+                        Operações contratadas eram registradas no DynamoDB, porém na sequência eram excluídas/desfeitas e consulta não reagia ao evento.
+                    </div>
+                    <div class="solution">
+                        <h5>Solução Implementada:</h5>
+                        <ul>
+                            <li>Escutamos os eventos de desfazimento de contratação e deletamos da base do DynamoDB</li>
+                            <li>Paliativamente excluímos todas as operações desfeitas no ano de 2025 com um script Python</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="problem-item">
+                    <h4>3. Carga Full do dia 18/10/2025 para SF5</h4>
+                    <div class="problem-text">
+                        <strong>Problema:</strong>
+                        No dia 18/10 foi realizada a carga full para as operações do SF5, porém essa carga não excluiu operações que estavam ativas no DynamoDB e expurgadas da base do DB2.
+                    </div>
+                    <div class="solution">
+                        <h5>Solução Implementada:</h5>
+                        <ul>
+                            <li>Fizemos a exclusão lógica dos dados que estavam com a carga do SF5 anterior a 18/10/2025</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="problem-item">
+                    <h4>4. Janela de 13/06/2025 até 21/06/2025</h4>
+                    <div class="problem-text">
+                        <strong>Problema:</strong>
+                        Na primeira semana do CDC fizemos um piloto e identificamos que havia um problema no tipo de dado que o CDC inputava na tabela, fazendo com que o Glue nunca atualizasse a operação, deixando os dados desse intervalo desatualizados.
+                    </div>
+                    <div class="solution">
+                        <h5>Solução Implementada:</h5>
+                        <ul>
+                            <li>Fizemos a exclusão lógica dos dados que estavam neste intervalo</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
         </div>
 
+        <!-- Footer -->
         <div class="footer">
             <p>Relatório gerado em <span id="date"></span></p>
         </div>
     </div>
 
     <script>
-        // Adiciona a data atual
         document.getElementById('date').textContent = new Date().toLocaleDateString('pt-BR', {
             day: '2-digit',
             month: '2-digit',
