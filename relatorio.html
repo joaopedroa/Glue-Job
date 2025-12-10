@@ -346,6 +346,194 @@
                 </div>
             </section>
 
+            <!-- Timeline -->
+            <section class="section">
+                <h2>Cronologia do Projeto</h2>
+                
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-date">31/10/2025</div>
+                        <div class="timeline-content">
+                            <ul>
+                                <li>Início do piloto com JZ4 e JX8</li>
+                                <li>Problemas identificados com JX8 e desligamento parcial</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-date">04/11/2025</div>
+                        <div class="timeline-content">
+                            <ul>
+                                <li>Expansão do JX8 após resolução de alguns problemas
+                                    <ul>
+                                        <li>Combinamos de deixar ligado das 13:00 até 23:59</li>
+                                        <li>Motivadores: Carga do Glue tem início as 09:30 para o SF5 o que poderia deixar os dados desatualizados por um longo período de tempo</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-date">18/11/2025</div>
+                        <div class="timeline-content">
+                            <ul>
+                                <li>Expansão do piloto com LF90</li>
+                                <li>Identificado problema com o Portal Manager, no qual não atualizava 100% das tasks</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-date">24/11/2025</div>
+                        <div class="timeline-content">
+                            <ul>
+                                <li>Implantação de correções referente aos apontamentos que clientes retornaram</li>
+                                <li>QuickConfig restartado automaticamente e Portal Manager funcionando perfeitamente</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-date">27/11/2025</div>
+                        <div class="timeline-content">
+                            <ul>
+                                <li>WR referente as baixas do consignado</li>
+                                <li>Reclamação que os dados entregues pela consulta estavam desatualizados</li>
+                                <li>Desligamento para o Consignado</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-date">28/11/2025</div>
+                        <div class="timeline-content">
+                            <ul>
+                                <li>Ligamos o piloto para 100% devido ao objetivo de economia de MIPS</li>
+                                <li>Trabalhamos na elegibilidade para tentar diminuir o impacto da sincronização
+                                    <ul>
+                                        <li>Colocamos o indicador de processamento batch para irmos ao mainframe ao invés de entregar informação desatualizada</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-date">01/12/2025</div>
+                        <div class="timeline-content">
+                            <ul>
+                                <li>Desligamos o piloto parcialmente</li>
+                                <li>Problema de replicação de chaves do portal manager</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-date">02/12/2025</div>
+                        <div class="timeline-content">
+                            <ul>
+                                <li>Desligamos o piloto 100%</li>
+                                <li>Problema de replicação</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-date">03/12/2025</div>
+                        <div class="timeline-content">
+                            <ul>
+                                <li>Subimos as novas regras de elegibilidade</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-date">09/12/2025</div>
+                        <div class="timeline-content">
+                            <ul>
+                                <li>Identificamos que a regra do F5 de atualizar conforme demanda não está valendo a pena, pois atualizamos muitas operações do F5 sem necessidade.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="timeline-item">
+                        <div class="timeline-date">10/12/2025</div>
+                        <div class="timeline-content">
+                            <ul>
+                                <li>Subimos uma alteração para ignorar atualizações do F5 (Parametrização)</li>
+                                <li>Subimos uma nova estratégia de consulta para tentar diminuir ainda mais os MIPS e impactarmos menos nossos clientes</li>
+                                <li>Conversamos para restartar o problema service do QuickConfig para confiarmos 100% no portal manager</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Problemas e Soluções -->
+            <section class="section">
+                <h2>Problemas Identificados e Soluções</h2>
+                
+                <div class="problem-item">
+                    <h4>1. Consulta Eventualmente Consistente</h4>
+                    <div class="problem-text">
+                        <strong>Problema:</strong>
+                        Consumidores não podemos trabalhar com dado eventualmente consistente.
+                    </div>
+                    <div class="solution">
+                        <h5>Solução Implementada:</h5>
+                        <ul>
+                            <li>Indicador de processamento batch</li>
+                            <li>Janela controlada para não impactar clientes</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="problem-item">
+                    <h4>2. Desfazimento de Operações</h4>
+                    <div class="problem-text">
+                        <strong>Problema:</strong>
+                        Operações contratadas eram registradas no DynamoDB, porém na sequência eram excluídas/desfeitas e consulta não reagia ao evento.
+                    </div>
+                    <div class="solution">
+                        <h5>Solução Implementada:</h5>
+                        <ul>
+                            <li>Escutamos os eventos de desfazimento de contratação e deletamos da base do DynamoDB</li>
+                            <li>Paliativamente excluímos todas as operações desfeitas no ano de 2025 com um script Python</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="problem-item">
+                    <h4>3. Carga Full do dia 18/10/2025 para SF5</h4>
+                    <div class="problem-text">
+                        <strong>Problema:</strong>
+                        No dia 18/10 foi realizada a carga full para as operações do SF5, porém essa carga não excluiu operações que estavam ativas no DynamoDB e expurgadas da base do DB2.
+                    </div>
+                    <div class="solution">
+                        <h5>Solução Implementada:</h5>
+                        <ul>
+                            <li>Fizemos a exclusão lógica dos dados que estavam com a carga do SF5 anterior a 18/10/2025</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="problem-item">
+                    <h4>4. Janela de 13/06/2025 até 21/06/2025</h4>
+                    <div class="problem-text">
+                        <strong>Problema:</strong>
+                        Na primeira semana do CDC fizemos um piloto e identificamos que havia um problema no tipo de dado que o CDC inputava na tabela, fazendo com que o Glue nunca atualizasse a operação, deixando os dados desse intervalo desatualizados.
+                    </div>
+                    <div class="solution">
+                        <h5>Solução Implementada:</h5>
+                        <ul>
+                            <li>Fizemos a exclusão lógica dos dados que estavam neste intervalo</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
             <!-- Volumetria -->
             <section class="section">
                 <h2>Volumetria - Evolução Mensal</h2>
@@ -935,194 +1123,6 @@
                             </tr>
                         </tbody>
                     </table>
-                </div>
-            </section>
-
-            <!-- Timeline -->
-            <section class="section">
-                <h2>Cronologia do Projeto</h2>
-                
-                <div class="timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-date">31/10/2025</div>
-                        <div class="timeline-content">
-                            <ul>
-                                <li>Início do piloto com JZ4 e JX8</li>
-                                <li>Problemas identificados com JX8 e desligamento parcial</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-date">04/11/2025</div>
-                        <div class="timeline-content">
-                            <ul>
-                                <li>Expansão do JX8 após resolução de alguns problemas
-                                    <ul>
-                                        <li>Combinamos de deixar ligado das 13:00 até 23:59</li>
-                                        <li>Motivadores: Carga do Glue tem início as 09:30 para o SF5 o que poderia deixar os dados desatualizados por um longo período de tempo</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-date">18/11/2025</div>
-                        <div class="timeline-content">
-                            <ul>
-                                <li>Expansão do piloto com LF90</li>
-                                <li>Identificado problema com o Portal Manager, no qual não atualizava 100% das tasks</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-date">24/11/2025</div>
-                        <div class="timeline-content">
-                            <ul>
-                                <li>Implantação de correções referente aos apontamentos que clientes retornaram</li>
-                                <li>QuickConfig restartado automaticamente e Portal Manager funcionando perfeitamente</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-date">27/11/2025</div>
-                        <div class="timeline-content">
-                            <ul>
-                                <li>WR referente as baixas do consignado</li>
-                                <li>Reclamação que os dados entregues pela consulta estavam desatualizados</li>
-                                <li>Desligamento para o Consignado</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-date">28/11/2025</div>
-                        <div class="timeline-content">
-                            <ul>
-                                <li>Ligamos o piloto para 100% devido ao objetivo de economia de MIPS</li>
-                                <li>Trabalhamos na elegibilidade para tentar diminuir o impacto da sincronização
-                                    <ul>
-                                        <li>Colocamos o indicador de processamento batch para irmos ao mainframe ao invés de entregar informação desatualizada</li>
-                                    </ul>
-                                </li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-date">01/12/2025</div>
-                        <div class="timeline-content">
-                            <ul>
-                                <li>Desligamos o piloto parcialmente</li>
-                                <li>Problema de replicação de chaves do portal manager</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-date">02/12/2025</div>
-                        <div class="timeline-content">
-                            <ul>
-                                <li>Desligamos o piloto 100%</li>
-                                <li>Problema de replicação</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-date">03/12/2025</div>
-                        <div class="timeline-content">
-                            <ul>
-                                <li>Subimos as novas regras de elegibilidade</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-date">09/12/2025</div>
-                        <div class="timeline-content">
-                            <ul>
-                                <li>Identificamos que a regra do F5 de atualizar conforme demanda não está valendo a pena, pois atualizamos muitas operações do F5 sem necessidade.</li>
-                            </ul>
-                        </div>
-                    </div>
-
-                    <div class="timeline-item">
-                        <div class="timeline-date">10/12/2025</div>
-                        <div class="timeline-content">
-                            <ul>
-                                <li>Subimos uma alteração para ignorar atualizações do F5 (Parametrização)</li>
-                                <li>Subimos uma nova estratégia de consulta para tentar diminuir ainda mais os MIPS e impactarmos menos nossos clientes</li>
-                                <li>Conversamos para restartar o problema service do QuickConfig para confiarmos 100% no portal manager</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Problemas e Soluções -->
-            <section class="section">
-                <h2>Problemas Identificados e Soluções</h2>
-                
-                <div class="problem-item">
-                    <h4>1. Consulta Eventualmente Consistente</h4>
-                    <div class="problem-text">
-                        <strong>Problema:</strong>
-                        Consumidores não podemos trabalhar com dado eventualmente consistente.
-                    </div>
-                    <div class="solution">
-                        <h5>Solução Implementada:</h5>
-                        <ul>
-                            <li>Indicador de processamento batch</li>
-                            <li>Janela controlada para não impactar clientes</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="problem-item">
-                    <h4>2. Desfazimento de Operações</h4>
-                    <div class="problem-text">
-                        <strong>Problema:</strong>
-                        Operações contratadas eram registradas no DynamoDB, porém na sequência eram excluídas/desfeitas e consulta não reagia ao evento.
-                    </div>
-                    <div class="solution">
-                        <h5>Solução Implementada:</h5>
-                        <ul>
-                            <li>Escutamos os eventos de desfazimento de contratação e deletamos da base do DynamoDB</li>
-                            <li>Paliativamente excluímos todas as operações desfeitas no ano de 2025 com um script Python</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="problem-item">
-                    <h4>3. Carga Full do dia 18/10/2025 para SF5</h4>
-                    <div class="problem-text">
-                        <strong>Problema:</strong>
-                        No dia 18/10 foi realizada a carga full para as operações do SF5, porém essa carga não excluiu operações que estavam ativas no DynamoDB e expurgadas da base do DB2.
-                    </div>
-                    <div class="solution">
-                        <h5>Solução Implementada:</h5>
-                        <ul>
-                            <li>Fizemos a exclusão lógica dos dados que estavam com a carga do SF5 anterior a 18/10/2025</li>
-                        </ul>
-                    </div>
-                </div>
-
-                <div class="problem-item">
-                    <h4>4. Janela de 13/06/2025 até 21/06/2025</h4>
-                    <div class="problem-text">
-                        <strong>Problema:</strong>
-                        Na primeira semana do CDC fizemos um piloto e identificamos que havia um problema no tipo de dado que o CDC inputava na tabela, fazendo com que o Glue nunca atualizasse a operação, deixando os dados desse intervalo desatualizados.
-                    </div>
-                    <div class="solution">
-                        <h5>Solução Implementada:</h5>
-                        <ul>
-                            <li>Fizemos a exclusão lógica dos dados que estavam neste intervalo</li>
-                        </ul>
-                    </div>
                 </div>
             </section>
         </div>
