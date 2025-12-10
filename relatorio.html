@@ -181,6 +181,108 @@
             color: #555;
         }
 
+        /* Tabela */
+        .table-container {
+            overflow-x: auto;
+            margin: 25px 0;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            font-size: 0.95em;
+        }
+
+        thead {
+            background: #ff6900;
+            color: white;
+        }
+
+        th {
+            padding: 15px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        tbody tr:hover {
+            background: #fff8f3;
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .number {
+            text-align: right;
+            font-family: 'Courier New', monospace;
+        }
+
+        tbody tr.total-row {
+            background: #fff8f3;
+            font-weight: 700;
+        }
+
+        tbody tr.total-row td {
+            border-top: 2px solid #ff6900;
+            padding-top: 15px;
+        }
+
+        td.total-col {
+            background: #fff8f3;
+            font-weight: 700;
+            border-left: 2px solid #ff6900;
+        }
+
+        /* Gráfico */
+        .chart-container {
+            margin: 30px 0;
+            padding: 25px;
+            background: #fff8f3;
+            border-radius: 8px;
+            border: 1px solid #ff6900;
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 400px;
+            margin-top: 20px;
+        }
+
+        .chart-analysis {
+            background: #fff8f3;
+            border-left: 4px solid #ff6900;
+            padding: 20px;
+            margin-top: 25px;
+            border-radius: 8px;
+        }
+
+        .chart-analysis h4 {
+            color: #ff6900;
+            font-size: 1.2em;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .chart-analysis ul {
+            margin-left: 20px;
+            margin-top: 10px;
+        }
+
+        .chart-analysis li {
+            margin-bottom: 8px;
+            color: #555;
+            line-height: 1.6;
+        }
+
         /* Footer */
         .footer {
             background: #f5f5f5;
@@ -241,6 +343,598 @@
                     <p><strong>Foco Estratégico:</strong> Seu objetivo não está diretamente ligado ao tempo de resposta e melhorias de performance, mas sim, na diminuição dos custos referente ao mainframe.</p>
                     
                     <p><strong>Funcionamento:</strong> A consulta Lazy utiliza uma lógica na qual busca as informações da consulta otimizada (DynamoDB) e realiza algumas validações para saber se o dado é ou não confiável para ser entregue ao cliente.</p>
+                </div>
+            </section>
+
+            <!-- Volumetria -->
+            <section class="section">
+                <h2>Volumetria - Evolução Mensal</h2>
+                
+                <div class="chart-container">
+                    <h3>Gráfico de Evolução - Total MIPS</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="totalMipsChart"></canvas>
+                    </div>
+                    <div class="chart-analysis">
+                        <h4>📊 Análise do Aumento de MIPS</h4>
+                        <ul>
+                            <li><strong>Out/25:</strong> Aumento significativo devido à expansão do piloto para 100% da base, conforme decisão estratégica de 28/11 para maximizar a economia de MIPS.</li>
+                            <li><strong>Set/25:</strong> Crescimento relacionado à expansão do piloto com LF90 e implementação de melhorias no Portal Manager.</li>
+                            <li><strong>Nov/25:</strong> Queda observada após desligamento parcial e total do piloto (01-02/12) devido a problemas de replicação, seguido de implementação de novas regras de elegibilidade.</li>
+                            <li><strong>Tendência Geral:</strong> O aumento progressivo reflete a expansão gradual do projeto, com pico em Out/25 quando o piloto atingiu 100% de cobertura.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Mês</th>
+                                <th class="number">Amortização</th>
+                                <th class="number">Parcela</th>
+                                <th class="number">Saldo</th>
+                                <th class="number">Contrato C</th>
+                                <th class="number">Movimento</th>
+                                <th class="number">Evento de N</th>
+                                <th class="number">Operação</th>
+                                <th class="number">Plano</th>
+                                <th class="number">Originação</th>
+                                <th class="number">Componente</th>
+                                <th class="number">Perfil Cliente</th>
+                                <th class="number">Recebimento</th>
+                                <th class="number">Participante MIPS</th>
+                                <th class="number total-col">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Mai/25</strong></td>
+                                <td class="number">204.948.882</td>
+                                <td class="number">270.298.561</td>
+                                <td class="number">156.931.278</td>
+                                <td class="number">1.143.573</td>
+                                <td class="number">2.950.681</td>
+                                <td class="number">3.283.650</td>
+                                <td class="number">284.381.957</td>
+                                <td class="number">252.640.290</td>
+                                <td class="number">284.285.755</td>
+                                <td class="number">131.029.048</td>
+                                <td class="number">27.778.516</td>
+                                <td class="number">4.696.892</td>
+                                <td class="number"><strong>164.367.031</strong></td>
+                                <td class="number total-col"><strong>1.707.890.479</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Jun/25</strong></td>
+                                <td class="number">202.449.686</td>
+                                <td class="number">281.004.766</td>
+                                <td class="number">159.392.740</td>
+                                <td class="number">4.526.240</td>
+                                <td class="number">4.966.813</td>
+                                <td class="number">2.141.870</td>
+                                <td class="number">292.354.584</td>
+                                <td class="number">258.546.638</td>
+                                <td class="number">293.261.100</td>
+                                <td class="number">138.966.606</td>
+                                <td class="number">33.633.848</td>
+                                <td class="number">6.881.161</td>
+                                <td class="number"><strong>164.487.256</strong></td>
+                                <td class="number total-col"><strong>1.701.064.169</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Jul/25</strong></td>
+                                <td class="number">205.615.959</td>
+                                <td class="number">281.749.505</td>
+                                <td class="number">148.352.224</td>
+                                <td class="number">13.245.977</td>
+                                <td class="number">12.139.175</td>
+                                <td class="number">23.146</td>
+                                <td class="number">296.239.827</td>
+                                <td class="number">251.455.988</td>
+                                <td class="number">296.121.659</td>
+                                <td class="number">139.828.257</td>
+                                <td class="number">42.648.074</td>
+                                <td class="number">16.494.943</td>
+                                <td class="number"><strong>173.094.683</strong></td>
+                                <td class="number total-col"><strong>1.706.178.805</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Ago/25</strong></td>
+                                <td class="number">221.514.347</td>
+                                <td class="number">308.858.042</td>
+                                <td class="number">156.645.968</td>
+                                <td class="number">30.980.094</td>
+                                <td class="number">14.668.655</td>
+                                <td class="number">15.009</td>
+                                <td class="number">320.682.966</td>
+                                <td class="number">274.823.340</td>
+                                <td class="number">320.540.679</td>
+                                <td class="number">166.459.569</td>
+                                <td class="number">44.429.740</td>
+                                <td class="number">23.949.962</td>
+                                <td class="number"><strong>191.791.513</strong></td>
+                                <td class="number total-col"><strong>1.890.212.186</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Set/25</strong></td>
+                                <td class="number">284.885.811</td>
+                                <td class="number">396.222.188</td>
+                                <td class="number">213.868.887</td>
+                                <td class="number">44.852.874</td>
+                                <td class="number">11.069.871</td>
+                                <td class="number">15.268</td>
+                                <td class="number">416.921.365</td>
+                                <td class="number">363.827.893</td>
+                                <td class="number">416.808.919</td>
+                                <td class="number">220.176.371</td>
+                                <td class="number">56.808.430</td>
+                                <td class="number">25.013.579</td>
+                                <td class="number"><strong>237.063.625</strong></td>
+                                <td class="number total-col"><strong>2.466.564.135</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Out/25</strong></td>
+                                <td class="number">333.992.499</td>
+                                <td class="number">429.337.069</td>
+                                <td class="number">235.476.923</td>
+                                <td class="number">53.481.177</td>
+                                <td class="number">6.690.447</td>
+                                <td class="number">25.225</td>
+                                <td class="number">487.715.438</td>
+                                <td class="number">400.127.105</td>
+                                <td class="number">487.196.311</td>
+                                <td class="number">232.020.735</td>
+                                <td class="number">62.032.692</td>
+                                <td class="number">27.813.248</td>
+                                <td class="number"><strong>284.204.072</strong></td>
+                                <td class="number total-col"><strong>2.914.785.729</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Nov/25</strong></td>
+                                <td class="number">244.317.133</td>
+                                <td class="number">347.019.944</td>
+                                <td class="number">190.201.069</td>
+                                <td class="number">33.745.624</td>
+                                <td class="number">15.843.420</td>
+                                <td class="number">7.342.065</td>
+                                <td class="number">387.408.278</td>
+                                <td class="number">309.350.867</td>
+                                <td class="number">387.194.096</td>
+                                <td class="number">188.856.015</td>
+                                <td class="number">80.021.219</td>
+                                <td class="number">38.202.956</td>
+                                <td class="number"><strong>239.575.195</strong></td>
+                                <td class="number total-col"><strong>2.383.078.080</strong></td>
+                            </tr>
+                            <tr class="total-row">
+                                <td><strong>TOTAL</strong></td>
+                                <td class="number"><strong>1.697.768.317</strong></td>
+                                <td class="number"><strong>2.386.484.075</strong></td>
+                                <td class="number"><strong>1.360.864.989</strong></td>
+                                <td class="number"><strong>181.975.359</strong></td>
+                                <td class="number"><strong>69.329.062</strong></td>
+                                <td class="number"><strong>12.931.233</strong></td>
+                                <td class="number"><strong>2.585.702.415</strong></td>
+                                <td class="number"><strong>2.210.791.021</strong></td>
+                                <td class="number"><strong>2.585.508.519</strong></td>
+                                <td class="number"><strong>1.218.335.600</strong></td>
+                                <td class="number"><strong>327.351.327</strong></td>
+                                <td class="number"><strong>122.135.741</strong></td>
+                                <td class="number"><strong>1.453.583.375</strong></td>
+                                <td class="number total-col"><strong>15.031.617.032</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Volumetria SF -->
+            <section class="section">
+                <h2>Volumetria SF - Transações por Mês</h2>
+                
+                <div class="chart-container">
+                    <h3>Gráfico de Evolução - Total SF</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="sfChart"></canvas>
+                    </div>
+                    <div class="chart-analysis">
+                        <h4>📊 Análise do Aumento de Transações SF</h4>
+                        <ul>
+                            <li><strong>Set/25:</strong> Aumento significativo (8.410) relacionado à expansão do piloto e melhorias na sincronização de dados.</li>
+                            <li><strong>Out/25 e Nov/25:</strong> Estabilização em patamar elevado (8.414 e 8.830) após implementação de correções e otimizações no Portal Manager.</li>
+                            <li><strong>Dez/25:</strong> Leve queda (8.783) após ajustes na estratégia de consulta e parametrização para ignorar atualizações do F5 desnecessárias.</li>
+                            <li><strong>Principais Contribuintes:</strong> SFOIPR1 (maior volume), SFOICOR e SFOIAMO são as transações que mais impactam o total, representando a maior parte do volume processado.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Transação</th>
+                                <th class="number">Mai/25</th>
+                                <th class="number">Jun/25</th>
+                                <th class="number">Jul/25</th>
+                                <th class="number">Ago/25</th>
+                                <th class="number">Set/25</th>
+                                <th class="number">Out/25</th>
+                                <th class="number">Nov/25</th>
+                                <th class="number">Dez/25</th>
+                                <th class="number total-col">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>SFOIAMO</strong></td>
+                                <td class="number">536</td>
+                                <td class="number">594</td>
+                                <td class="number">509</td>
+                                <td class="number">582</td>
+                                <td class="number">868</td>
+                                <td class="number">927</td>
+                                <td class="number">940</td>
+                                <td class="number">930</td>
+                                <td class="number total-col"><strong>4.886</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>SFOICFO</strong></td>
+                                <td class="number">115</td>
+                                <td class="number">127</td>
+                                <td class="number">119</td>
+                                <td class="number">159</td>
+                                <td class="number">250</td>
+                                <td class="number">266</td>
+                                <td class="number">245</td>
+                                <td class="number">271</td>
+                                <td class="number total-col"><strong>1.551</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>SFOINVO</strong></td>
+                                <td class="number">1</td>
+                                <td class="number">2</td>
+                                <td class="number">18</td>
+                                <td class="number">16</td>
+                                <td class="number">133</td>
+                                <td class="number">137</td>
+                                <td class="number">80</td>
+                                <td class="number">107</td>
+                                <td class="number total-col"><strong>494</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>SFOIMVO</strong></td>
+                                <td class="number">0</td>
+                                <td class="number">0</td>
+                                <td class="number">18</td>
+                                <td class="number">14</td>
+                                <td class="number">49</td>
+                                <td class="number">16</td>
+                                <td class="number">20</td>
+                                <td class="number">24</td>
+                                <td class="number total-col"><strong>141</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>SF0IOPO</strong></td>
+                                <td class="number">443</td>
+                                <td class="number">513</td>
+                                <td class="number">417</td>
+                                <td class="number">493</td>
+                                <td class="number">755</td>
+                                <td class="number">850</td>
+                                <td class="number">791</td>
+                                <td class="number">869</td>
+                                <td class="number total-col"><strong>5.133</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>SFOICOR</strong></td>
+                                <td class="number">619</td>
+                                <td class="number">714</td>
+                                <td class="number">573</td>
+                                <td class="number">685</td>
+                                <td class="number">1.046</td>
+                                <td class="number">1.176</td>
+                                <td class="number">1.147</td>
+                                <td class="number">1.102</td>
+                                <td class="number total-col"><strong>7.062</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>SFOIPR1</strong></td>
+                                <td class="number">1.314</td>
+                                <td class="number">1.403</td>
+                                <td class="number">1.307</td>
+                                <td class="number">1.464</td>
+                                <td class="number">2.224</td>
+                                <td class="number">2.253</td>
+                                <td class="number">2.690</td>
+                                <td class="number">2.199</td>
+                                <td class="number total-col"><strong>14.354</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>SF0ID6C</strong></td>
+                                <td class="number">593</td>
+                                <td class="number">654</td>
+                                <td class="number">545</td>
+                                <td class="number">639</td>
+                                <td class="number">916</td>
+                                <td class="number">1.024</td>
+                                <td class="number">996</td>
+                                <td class="number">1.025</td>
+                                <td class="number total-col"><strong>6.396</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>SFOINFO</strong></td>
+                                <td class="number">34</td>
+                                <td class="number">59</td>
+                                <td class="number">52</td>
+                                <td class="number">50</td>
+                                <td class="number">156</td>
+                                <td class="number">102</td>
+                                <td class="number">177</td>
+                                <td class="number">136</td>
+                                <td class="number total-col"><strong>766</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>SFOIPAO</strong></td>
+                                <td class="number">771</td>
+                                <td class="number">883</td>
+                                <td class="number">705</td>
+                                <td class="number">832</td>
+                                <td class="number">1.229</td>
+                                <td class="number">1.246</td>
+                                <td class="number">1.215</td>
+                                <td class="number">1.258</td>
+                                <td class="number total-col"><strong>8.339</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>SFOIRVO</strong></td>
+                                <td class="number">11</td>
+                                <td class="number">9</td>
+                                <td class="number">28</td>
+                                <td class="number">35</td>
+                                <td class="number">91</td>
+                                <td class="number">65</td>
+                                <td class="number">73</td>
+                                <td class="number">84</td>
+                                <td class="number total-col"><strong>396</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>SF01100</strong></td>
+                                <td class="number">260</td>
+                                <td class="number">249</td>
+                                <td class="number">2.190</td>
+                                <td class="number">306</td>
+                                <td class="number">562</td>
+                                <td class="number">352</td>
+                                <td class="number">456</td>
+                                <td class="number">658</td>
+                                <td class="number total-col"><strong>5.231</strong></td>
+                            </tr>
+                            <tr class="total-row">
+                                <td><strong>TOTAL</strong></td>
+                                <td class="number"><strong>4.697</strong></td>
+                                <td class="number"><strong>6.207</strong></td>
+                                <td class="number"><strong>6.480</strong></td>
+                                <td class="number"><strong>5.776</strong></td>
+                                <td class="number"><strong>8.410</strong></td>
+                                <td class="number"><strong>8.414</strong></td>
+                                <td class="number"><strong>8.830</strong></td>
+                                <td class="number"><strong>8.783</strong></td>
+                                <td class="number total-col"><strong>57.577</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Volumetria F5 -->
+            <section class="section">
+                <h2>Volumetria F5 - Transações por Mês</h2>
+                
+                <div class="chart-container">
+                    <h3>Gráfico de Evolução - Total F5</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="f5Chart"></canvas>
+                    </div>
+                    <div class="chart-analysis">
+                        <h4>📊 Análise do Aumento de Transações F5</h4>
+                        <ul>
+                            <li><strong>Jun/25:</strong> Primeiro aumento significativo (3.574) após início das operações e ajustes iniciais do sistema.</li>
+                            <li><strong>Set/25:</strong> Crescimento para 3.366 transações, alinhado com a expansão geral do projeto e melhorias na elegibilidade.</li>
+                            <li><strong>Nov/25:</strong> Aumento expressivo para 4.723, coincidindo com a expansão do piloto para 100% e otimizações implementadas.</li>
+                            <li><strong>Dez/25:</strong> Pico de 6.022 transações, refletindo a nova estratégia de consulta implementada em 10/12 e a estabilização do sistema após correções.</li>
+                            <li><strong>Principais Contribuintes:</strong> F50IOE70 (maior volume com 10.559 total) e F50IAM0 (8.821 total) são as transações que mais impactam o crescimento observado.</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Transação</th>
+                                <th class="number">Mai/25</th>
+                                <th class="number">Jun/25</th>
+                                <th class="number">Jul/25</th>
+                                <th class="number">Ago/25</th>
+                                <th class="number">Set/25</th>
+                                <th class="number">Out/25</th>
+                                <th class="number">Nov/25</th>
+                                <th class="number">Dez/25</th>
+                                <th class="number total-col">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>F50IAM0</strong></td>
+                                <td class="number">754</td>
+                                <td class="number">666</td>
+                                <td class="number">552</td>
+                                <td class="number">554</td>
+                                <td class="number">793</td>
+                                <td class="number">1.111</td>
+                                <td class="number">1.325</td>
+                                <td class="number">3.066</td>
+                                <td class="number total-col"><strong>8.821</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>F50IVCP0</strong></td>
+                                <td class="number">59</td>
+                                <td class="number">87</td>
+                                <td class="number">55</td>
+                                <td class="number">46</td>
+                                <td class="number">71</td>
+                                <td class="number">62</td>
+                                <td class="number">67</td>
+                                <td class="number">58</td>
+                                <td class="number total-col"><strong>492</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>F50INV0</strong></td>
+                                <td class="number">0</td>
+                                <td class="number">1</td>
+                                <td class="number">0</td>
+                                <td class="number">1</td>
+                                <td class="number">22</td>
+                                <td class="number">16</td>
+                                <td class="number">17</td>
+                                <td class="number">34</td>
+                                <td class="number total-col"><strong>91</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>F50IMV00</strong></td>
+                                <td class="number">4</td>
+                                <td class="number">3</td>
+                                <td class="number">0</td>
+                                <td class="number">0</td>
+                                <td class="number">0</td>
+                                <td class="number">0</td>
+                                <td class="number">4</td>
+                                <td class="number">18</td>
+                                <td class="number total-col"><strong>29</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>F50IOP01</strong></td>
+                                <td class="number">204</td>
+                                <td class="number">299</td>
+                                <td class="number">199</td>
+                                <td class="number">162</td>
+                                <td class="number">235</td>
+                                <td class="number">254</td>
+                                <td class="number">268</td>
+                                <td class="number">240</td>
+                                <td class="number total-col"><strong>1.861</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>F50IVOR0</strong></td>
+                                <td class="number">69</td>
+                                <td class="number">102</td>
+                                <td class="number">60</td>
+                                <td class="number">50</td>
+                                <td class="number">74</td>
+                                <td class="number">80</td>
+                                <td class="number">78</td>
+                                <td class="number">77</td>
+                                <td class="number total-col"><strong>590</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>F50IPR1</strong></td>
+                                <td class="number">441</td>
+                                <td class="number">647</td>
+                                <td class="number">436</td>
+                                <td class="number">343</td>
+                                <td class="number">533</td>
+                                <td class="number">502</td>
+                                <td class="number">836</td>
+                                <td class="number">733</td>
+                                <td class="number total-col"><strong>4.472</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>F50ID6C0</strong></td>
+                                <td class="number">64</td>
+                                <td class="number">79</td>
+                                <td class="number">58</td>
+                                <td class="number">60</td>
+                                <td class="number">79</td>
+                                <td class="number">131</td>
+                                <td class="number">114</td>
+                                <td class="number">147</td>
+                                <td class="number total-col"><strong>732</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>F50INFO</strong></td>
+                                <td class="number">15</td>
+                                <td class="number">19</td>
+                                <td class="number">15</td>
+                                <td class="number">12</td>
+                                <td class="number">18</td>
+                                <td class="number">12</td>
+                                <td class="number">33</td>
+                                <td class="number">32</td>
+                                <td class="number total-col"><strong>156</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>F50II00</strong></td>
+                                <td class="number">28</td>
+                                <td class="number">48</td>
+                                <td class="number">46</td>
+                                <td class="number">37</td>
+                                <td class="number">57</td>
+                                <td class="number">37</td>
+                                <td class="number">81</td>
+                                <td class="number">179</td>
+                                <td class="number total-col"><strong>513</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>F50IVPL0</strong></td>
+                                <td class="number">52</td>
+                                <td class="number">66</td>
+                                <td class="number">48</td>
+                                <td class="number">42</td>
+                                <td class="number">64</td>
+                                <td class="number">52</td>
+                                <td class="number">62</td>
+                                <td class="number">27</td>
+                                <td class="number total-col"><strong>413</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>F50IOE70</strong></td>
+                                <td class="number">1.178</td>
+                                <td class="number">1.556</td>
+                                <td class="number">1.127</td>
+                                <td class="number">930</td>
+                                <td class="number">1.412</td>
+                                <td class="number">1.356</td>
+                                <td class="number">1.755</td>
+                                <td class="number">1.245</td>
+                                <td class="number total-col"><strong>10.559</strong></td>
+                            </tr>
+                            <tr>
+                                <td><strong>F50IEVN</strong></td>
+                                <td class="number">65</td>
+                                <td class="number">52</td>
+                                <td class="number">0</td>
+                                <td class="number">0</td>
+                                <td class="number">0</td>
+                                <td class="number">0</td>
+                                <td class="number">44</td>
+                                <td class="number">200</td>
+                                <td class="number total-col"><strong>361</strong></td>
+                            </tr>
+                            <tr class="total-row">
+                                <td><strong>TOTAL</strong></td>
+                                <td class="number"><strong>2.992</strong></td>
+                                <td class="number"><strong>3.574</strong></td>
+                                <td class="number"><strong>2.596</strong></td>
+                                <td class="number"><strong>2.197</strong></td>
+                                <td class="number"><strong>3.366</strong></td>
+                                <td class="number"><strong>3.519</strong></td>
+                                <td class="number"><strong>4.723</strong></td>
+                                <td class="number"><strong>6.022</strong></td>
+                                <td class="number total-col"><strong>31.949</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
@@ -439,6 +1133,8 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
     <script>
         document.getElementById('date').textContent = new Date().toLocaleDateString('pt-BR', {
             day: '2-digit',
@@ -446,6 +1142,373 @@
             year: 'numeric',
             hour: '2-digit',
             minute: '2-digit'
+        });
+
+        // Dados da volumetria - Totais por mês
+        const totalMipsData = {
+            meses: ['Mai/25', 'Jun/25', 'Jul/25', 'Ago/25', 'Set/25', 'Out/25', 'Nov/25'],
+            totalMips: [1707890479, 1701064169, 1706178805, 1890212186, 2466564135, 2914785729, 2383078080]
+        };
+
+        // Formatar número
+        function formatNumber(num) {
+            return new Intl.NumberFormat('pt-BR').format(num);
+        }
+
+        // Registrar plugin datalabels
+        Chart.register(ChartDataLabels);
+
+        // Criar gráfico de Total MIPS
+        const ctx = document.getElementById('totalMipsChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: totalMipsData.meses,
+                datasets: [
+                    {
+                        label: 'Total MIPS',
+                        data: totalMipsData.totalMips,
+                        borderColor: '#ff6900',
+                        backgroundColor: 'rgba(255, 105, 0, 0.15)',
+                        borderWidth: 4,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#ff6900',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: {
+                            size: 13,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 12
+                        },
+                        callbacks: {
+                            label: function(context) {
+                                return 'Total: ' + formatNumber(context.parsed.y);
+                            }
+                        }
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        color: '#ff6900',
+                        font: {
+                            weight: 'bold',
+                            size: 11
+                        },
+                        formatter: function(value) {
+                            if (value >= 1000000000) {
+                                return (value / 1000000000).toFixed(2) + 'B';
+                            } else if (value >= 1000000) {
+                                return (value / 1000000).toFixed(1) + 'M';
+                            } else if (value >= 1000) {
+                                return (value / 1000).toFixed(1) + 'K';
+                            }
+                            return formatNumber(value);
+                        },
+                        padding: {
+                            top: 5
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        ticks: {
+                            callback: function(value) {
+                                if (value >= 1000000000) {
+                                    return (value / 1000000000).toFixed(2) + 'B';
+                                } else if (value >= 1000000) {
+                                    return (value / 1000000).toFixed(1) + 'M';
+                                } else if (value >= 1000) {
+                                    return (value / 1000).toFixed(1) + 'K';
+                                }
+                                return value;
+                            },
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.08)'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Total MIPS',
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Dados SF - Total por mês
+        const totalSfData = {
+            meses: ['Mai/25', 'Jun/25', 'Jul/25', 'Ago/25', 'Set/25', 'Out/25', 'Nov/25', 'Dez/25'],
+            totalSf: [4697, 6207, 6480, 5776, 8410, 8414, 8830, 8783]
+        };
+
+        // Criar gráfico SF - Total
+        const ctxSF = document.getElementById('sfChart').getContext('2d');
+        new Chart(ctxSF, {
+            type: 'line',
+            data: {
+                labels: totalSfData.meses,
+                datasets: [
+                    {
+                        label: 'Total SF',
+                        data: totalSfData.totalSf,
+                        borderColor: '#ff6900',
+                        backgroundColor: 'rgba(255, 105, 0, 0.15)',
+                        borderWidth: 4,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#ff6900',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: {
+                            size: 13,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 12
+                        },
+                        callbacks: {
+                            label: function(context) {
+                                return 'Total: ' + formatNumber(context.parsed.y);
+                            }
+                        }
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        color: '#ff6900',
+                        font: {
+                            weight: 'bold',
+                            size: 11
+                        },
+                        formatter: function(value) {
+                            return formatNumber(value);
+                        },
+                        padding: {
+                            top: 5
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return formatNumber(value);
+                            },
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.08)'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Total Transações SF',
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Dados F5 - Total por mês
+        const totalF5Data = {
+            meses: ['Mai/25', 'Jun/25', 'Jul/25', 'Ago/25', 'Set/25', 'Out/25', 'Nov/25', 'Dez/25'],
+            totalF5: [2992, 3574, 2596, 2197, 3366, 3519, 4723, 6022]
+        };
+
+        // Criar gráfico F5 - Total
+        const ctxF5 = document.getElementById('f5Chart').getContext('2d');
+        new Chart(ctxF5, {
+            type: 'line',
+            data: {
+                labels: totalF5Data.meses,
+                datasets: [
+                    {
+                        label: 'Total F5',
+                        data: totalF5Data.totalF5,
+                        borderColor: '#ff6900',
+                        backgroundColor: 'rgba(255, 105, 0, 0.15)',
+                        borderWidth: 4,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 6,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: '#ff6900',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            font: {
+                                size: 14,
+                                weight: 'bold'
+                            },
+                            padding: 15
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: {
+                            size: 13,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 12
+                        },
+                        callbacks: {
+                            label: function(context) {
+                                return 'Total: ' + formatNumber(context.parsed.y);
+                            }
+                        }
+                    },
+                    datalabels: {
+                        anchor: 'end',
+                        align: 'top',
+                        color: '#ff6900',
+                        font: {
+                            weight: 'bold',
+                            size: 11
+                        },
+                        formatter: function(value) {
+                            return formatNumber(value);
+                        },
+                        padding: {
+                            top: 5
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            callback: function(value) {
+                                return formatNumber(value);
+                            },
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        },
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.08)'
+                        },
+                        title: {
+                            display: true,
+                            text: 'Total Transações F5',
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 12,
+                                weight: 'bold'
+                            }
+                        }
+                    }
+                }
+            }
         });
     </script>
 </body>
